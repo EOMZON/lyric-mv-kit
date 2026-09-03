@@ -50,8 +50,9 @@ HUD_BRAND_SIZE = 24
 HUD_LABEL_SIZE = 18
 HUD_SUB_SIZE = 30
 
-STANDARD_SIZE = (1146, 860)   # 4:3  — the default
+STANDARD_SIZE = (1146, 860)   # 4:3  — the default (B站 feed panel, no crop)
 WIDE_SIZE = (1146, 717)       # 16:10 — only when you want a wide-screen feel
+YT_SIZE = (1280, 720)         # 16:9  — YouTube thumbnail (YouTube is 16:9 only)
 
 
 # ------------------------------------------------------------------ primitives
@@ -228,8 +229,8 @@ def main():
     ap.add_argument("--title", required=True)
     ap.add_argument("--subtitle", default="")
     ap.add_argument("--out", default="cover.png")
-    ap.add_argument("--ratio", default="4:3", choices=["4:3", "16:10"],
-                    help="4:3 -> 1146x860 (default) | 16:10 -> 1146x717")
+    ap.add_argument("--ratio", default="4:3", choices=["4:3", "16:10", "16:9"],
+                    help="4:3 -> 1146x860 (default) | 16:10 -> 1146x717 | 16:9 -> 1280x720 (YouTube)")
     ap.add_argument("--energy", type=float, default=0.72,
                     help="aurora/spectrum energy 0..1 (chorus 0.72, ballad 0.45)")
     ap.add_argument("--seed", type=int, default=31)
@@ -237,7 +238,12 @@ def main():
     ap.add_argument("--no-hud", action="store_true")
     a = ap.parse_args()
 
-    W, H = WIDE_SIZE if a.ratio == "16:10" else STANDARD_SIZE
+    if a.ratio == "16:9":
+        W, H = YT_SIZE
+    elif a.ratio == "16:10":
+        W, H = WIDE_SIZE
+    else:
+        W, H = STANDARD_SIZE
     out, size = render_cover(a.title, a.subtitle, a.out, W, H,
                              energy=a.energy, seed=a.seed, t=a.phase,
                              show_hud=not a.no_hud)

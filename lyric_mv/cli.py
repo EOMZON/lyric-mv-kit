@@ -201,9 +201,14 @@ def cmd_demo(args):
 
 
 def cmd_cover(args):
-    from .cover import render_cover, STANDARD_SIZE, WIDE_SIZE
+    from .cover import render_cover, STANDARD_SIZE, WIDE_SIZE, YT_SIZE
 
-    W, H = WIDE_SIZE if args.ratio == "16:10" else STANDARD_SIZE
+    if args.ratio == "16:9":
+        W, H = YT_SIZE
+    elif args.ratio == "16:10":
+        W, H = WIDE_SIZE
+    else:
+        W, H = STANDARD_SIZE
     out, size = render_cover(args.title, args.subtitle, args.out, W, H,
                              energy=args.energy, seed=args.seed, t=args.phase,
                              show_hud=not args.no_hud)
@@ -269,7 +274,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--title", required=True)
     p.add_argument("--subtitle", default="")
     p.add_argument("--out", default="work/cover.png")
-    p.add_argument("--ratio", default="4:3", choices=["4:3", "16:10"])
+    p.add_argument("--ratio", default="4:3", choices=["4:3", "16:10", "16:9"])
     p.add_argument("--energy", type=float, default=0.72)
     p.add_argument("--seed", type=int, default=31)
     p.add_argument("--phase", type=float, default=0.0)

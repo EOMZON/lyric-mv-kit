@@ -1,3 +1,9 @@
+<div align="right">
+
+**English** · [中文](README.zh-CN.md)
+
+</div>
+
 # lyric-mv-kit
 
 > Pure-Python kinetic lyric-MV renderer. Eight visual styles. One CLI.
@@ -71,14 +77,14 @@ python scripts/fetch_fonts.py
 python -m lyric_mv check
 
 # 4. analyse a song + render a full MP4
-python -m lyric_mv build-plan   --audio song.wav --lyrics lyrics.txt \\
+python -m lyric_mv build-plan   --audio song.wav --lyrics lyrics.txt \
                                --song presets/song.example.json --outdir work
-python -m lyric_mv render       --plan work/plan.json \\
-                               --features work/audio_features.npz \\
+python -m lyric_mv render       --plan work/plan.json \
+                               --features work/audio_features.npz \
                                --style F_aurora_ribbon --out out/song.mp4
 
-# 5. generate a cover art PNG (4:3 / 1146x860)
-python -m lyric_mv cover --title "歌名" --subtitle "艺人 · 极光歌词MV" \\
+# 5. generate a cover art PNG (4:3 / 1146x860 for Bilibili, 16:9 / 1280x720 for YouTube)
+python -m lyric_mv cover --title "歌名" --subtitle "艺人 · 极光歌词MV" \
                          --out out/cover.png
 ```
 
@@ -96,7 +102,7 @@ positional arguments:
     render               plan.json -> full-song mp4
     preview              render stills at given timestamps
     demo                 short audio-bearing clip per style
-    cover                4:3 cover art
+    cover                4:3 / 16:9 / 16:10 cover art
 ```
 
 ---
@@ -134,7 +140,7 @@ Every piece of the diagram is a single-file Python module in `lyric_mv/`:
 | `renderer.py` | 670 | the base `Renderer` class (background / spectrum / particles / lyric / HUD) |
 | `styles_ad.py` | 400 | A–D style subclasses |
 | `styles_eh.py` | 500 | E–H style subclasses + demo-clip renderer |
-| `cover.py` | 220 | the lyric-MV cover generator |
+| `cover.py` | 220 | the lyric-MV cover generator (4:3 / 16:10 / 16:9) |
 | `cli.py` | 200 | unified CLI entry point |
 
 ---
@@ -148,16 +154,23 @@ swappable and (eventually) a Remotion port possible.
 
 ---
 
-## Reference song and showcase
+## Reference song & where to watch it
 
 The kit was originally authored to produce the aurora-ribbon lyric MV for the
-song 《我拒绝被定义》 by ROYAZON / 音右. The reference video is not
-redistributed in this repo; the stills in [`showcase/`](showcase/) are redrawn
-from the same design tokens as the shipped video.
+song 《我拒绝被定义》 by ROYAZON / 音右. Watch it on your platform of choice:
 
-- Bili: link to the public video
-- NetEase: <https://music.163.com/#/song?id=3422948585>
-- Brand site: <https://music.zondev.top>
+| Channel | Link | Notes |
+|---------|------|-------|
+| 🇨🇳 **Bilibili (中文)** | *publish link coming soon* — see [中文 README](README.zh-CN.md) | Chinese audience, B站 |
+| 🌐 **YouTube (English)** | *publish link coming soon* | English audience; same video, English title/copy |
+| 🎧 **NetEase Cloud Music** | <https://music.163.com/#/song?id=3422948585> | the song itself |
+| 🏠 **Brand site** | <https://music.zondev.top> | full catalog + lyric-video showcase |
+
+> The reference video is **not** redistributed in this repo. The stills in
+> [`showcase/`](showcase/) are redrawn from the same design tokens as the
+> shipped video. After the video goes live, drop the public URL into the table
+> above and into [`README.zh-CN.md`](README.zh-CN.md) — that keeps the
+> GitHub ↔ B站 ↔ YouTube ↔ music.zondev.top loop closed.
 
 ---
 
