@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Test / work artefacts
+work/
+out/
+*.log
+smoke/
+scratch/
+
+# Audio / video / large assets — never commit source masters
+*.wav
+*.mp3
+*.flac
+*.m4a
+*.aac
+*.ogg
+*.opus
+*.mp4
+*.mov
+*.mkv
+*.webm
+*.npz
+
+# Cover / lyric data the user generates locally
+stems/
+audio_features.npz
+plan.json
+song.local.json
+config.local.yaml
+
+# We do commit small showcase stills (PNG/JPG) — only exclude the huge ones
+*.cover_raw.png
+
+# Keep README-rendered demo screenshots even if they're PNGs
+!showcase/**
+!docs/**/*.png

@@ -1,0 +1,21 @@
+# Normalise line endings on push, keep unix LF in repo.
+* text=auto eol=lf
+
+# These are always LF
+*.py      text eol=lf
+*.md      text eol=lf
+*.json    text eol=lf
+*.yaml    text eol=lf
+*.yml     text eol=lf
+*.toml    text eol=lf
+*.txt     text eol=lf
+
+# Generated artefacts
+*.png     binary
+*.jpg     binary
+*.jpeg    binary
+*.gif     binary
+*.mp4     binary
+*.wav     binary
+*.mp3     binary
+*.npz     binary

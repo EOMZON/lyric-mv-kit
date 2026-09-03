@@ -1,0 +1,46 @@
+lyric-mv-kit
+Copyright (c) 2026 ROYAZON / Zon
+
+This product includes software developed by third parties:
+
+Project                                            License          Used in
+--------------------------------------------------  ---------------  -------------------------
+Pillow (PIL Fork)                                  HPND / MIT       Image, ImageDraw, ImageFilter,
+                                                                   ImageChops, ImageOps
+NumPy                                              BSD-3-Clause     array math
+OpenAI Whisper                                     MIT              optional: lyrics transcription
+stable-ts (stable-whisper)                         MIT              optional: forced alignment
+Demucs                                             MIT              optional: vocal-stem separation
+FFmpeg                                             LGPL / GPL       encoder (external binary)
+
+
+Font attribution
+----------------
+
+The renderer ships with **no font files**. At runtime it auto-detects one of
+the following families, in this order (see ``lyric_mv/config.py``):
+
+* Source Han Serif SC Heavy — SIL Open Font License 1.1
+  Adobe / Google / Changzhou SinoType. Source of the dramatic serif look used
+  by the bundled ``F_aurora_ribbon`` style.
+
+* Noto Serif SC, Noto Sans SC — SIL Open Font License 1.1
+  Google. Cross-platform open-source fallback.
+
+* Source Han Sans CN, Source Han Serif SC — SIL Open Font License 1.1
+
+If you do not have any of these installed, run ``python scripts/fetch_fonts.py``
+which downloads the Noto family into ``assets/fonts/`` (≈ 40 MB total).
+
+System fonts such as Dengb (DengXian Bold), msyh.ttc (Microsoft YaHei) and
+PingFang.ttc are NOT redistributable. They are used only as last-resort
+fallbacks when the OFL families above are unavailable, and never bundled.
+
+
+Reference song assets
+---------------------
+
+The bundled showcase images in ``showcase/`` are redrawn from the same design
+tokens as the renderer; no audio or full-frame video from any reference song is
+included in this repository. Full song audio and masters live in a separate
+non-public archive.

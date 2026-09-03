@@ -1,0 +1,32 @@
+# Project-level configuration for lyric-mv-kit.
+#
+# This is documentation only — it is NOT loaded at runtime. Copy it to
+# ``config.yaml`` in your project directory and edit, or just override via
+# environment variables (LYRIC_MV_FONT_HEAVY / ..._SANS / ..._LATIN /
+# LYRIC_MV_BRAND). See docs/FONTS.md for the full resolution order.
+
+# Top-left HUD wordmark (also overridable with LYRIC_MV_BRAND).
+brand: ROYAZON
+
+# Font paths. Leave empty to auto-detect from your OS (Windows / macOS /
+# Linux). The auto-detect looks for Source Han Serif SC Heavy → Source Han
+# Sans CN → DengXian Bold, in that order.
+#
+# Set an explicit absolute path here to force a particular font:
+# fonts:
+#   heavy: C:/Windows/Fonts/Source Han Serif SC Heavy (TrueType).ttf
+#   sans:  /usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc
+#   latin: /System/Library/Fonts/Helvetica.ttc
+fonts:
+  heavy: ~
+  sans:  ~
+  latin: ~
+
+# Render defaults (every CLI flag overrides these).
+render:
+  width: 1920
+  height: 1080
+  fps: 30
+  crf: 19          # libx264 quality; 18 visually lossless, 23 typical streaming
+  preset: medium   # ultrafast / superfast / veryfast / faster / fast / medium / slow
+  audio_bitrate: 192k

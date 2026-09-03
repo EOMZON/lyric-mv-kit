@@ -1,0 +1,15 @@
+# Core renderer — always required
+Pillow>=10.0
+numpy>=1.24
+
+# Optional: YAML support for config.yaml
+# Without it, env vars and auto-detection still work — see docs/FONTS.md.
+PyYAML>=6.0
+
+# --- Optional: lyric alignment pipeline (auto-generated cue_times) ---
+# pip install -U openai-whisper stable-ts
+#openai-whisper>=20231117
+#stable-ts>=2.0
+
+# --- Optional: vocal-stem separation (Demucs) ---
+#demucs>=4.0

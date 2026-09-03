@@ -1,0 +1,21 @@
+{
+  "_doc": "Sample song config. Rename to song.json (or pass any path via --song). Required fields are title and sections; cue_times is optional — omit it to let build-plan auto-distribute lines across sections by character count. See schemas/plan.schema.md for the full contract.",
+  "title": "示例歌曲",
+  "artist": "示例艺人",
+  "album": "示例专辑",
+  "meta": {
+    "key": "C 大调",
+    "style": "Pop · 模板示例"
+  },
+  "sections": [
+    { "kind": "verse1",  "lines": [0, 2], "start": 0.5,  "end": 6.0  },
+    { "kind": "chorus1", "lines": [2, 3], "start": 6.0,  "end": 9.0  },
+    { "kind": "outro",   "lines": [3, 4], "start": 9.0,  "end": 12.0 }
+  ],
+  "cue_times": [
+    [0.5, 2.0],
+    [2.2, 5.8],
+    [6.0, 8.8],
+    [9.0, 11.8]
+  ]
+}
