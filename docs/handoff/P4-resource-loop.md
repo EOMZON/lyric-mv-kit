@@ -86,6 +86,7 @@
 - 官网 https://music.zondev.top
 - 网易云单曲 https://music.163.com/#/song?id=3422948585
 - B站视频链接 <填真实 BV> / YouTube 链接 <填真实 id>（来自 P1 上传结果）
+- YouTube 频道 https://www.youtube.com/@ROYAZONEOM
 
 任务：
 1. 编辑 README.md 与 README.zh-CN.md 的「在哪看」资源矩阵，把 B站/YouTube 的
