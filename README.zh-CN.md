@@ -155,15 +155,14 @@ positional arguments:
 
 | 渠道 | 链接 | 说明 |
 |------|------|------|
-| 🇨🇳 **B站（中文）** | *待上传，链接随后补* | 中文观众主阵地 |
-| 🌐 **YouTube（英文）** | *待上传，链接随后补*——见 [English README](README.md) | 英文观众；同一视频，英文标题/文案 |
+| 🇨🇳 **B站（中文）** | <https://www.bilibili.com/video/BV1zRtX6WE5q> | 中文观众主阵地 |
+| 🌐 **YouTube（英文）** | <https://www.youtube.com/watch?v=rxPFQV7zfMg> | 英文观众；同一视频，英文标题/文案 |
 | 🎧 **网易云音乐** | <https://music.163.com/#/song?id=3422948585> | 歌曲本体 |
 | 🏠 **品牌官网** | <https://music.zondev.top> | 完整曲库 + 歌词视频展示 |
 
 > 参考视频**不**在本仓库内分发。 [`showcase/`](showcase/) 里的静帧是用与上线视频
-> 相同的设计令牌重绘的。视频上线后，把公开链接填进上表以及
-> [English README](README.md)——这样 GitHub ↔ B站 ↔ YouTube ↔ music.zondev.top
-> 的资源闭环就闭合了。
+> 相同的设计令牌重绘的。上表公开链接已与 [English README](README.md)
+> 同步，GitHub ↔ B站 ↔ YouTube ↔ music.zondev.top 的资源闭环已闭合。
 
 ---
 

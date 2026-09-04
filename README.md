@@ -161,16 +161,16 @@ song 《我拒绝被定义》 by ROYAZON / 音右. Watch it on your platform of 
 
 | Channel | Link | Notes |
 |---------|------|-------|
-| 🇨🇳 **Bilibili (中文)** | *publish link coming soon* — see [中文 README](README.zh-CN.md) | Chinese audience, B站 |
-| 🌐 **YouTube (English)** | *publish link coming soon* | English audience; same video, English title/copy |
+| 🇨🇳 **Bilibili (中文)** | <https://www.bilibili.com/video/BV1zRtX6WE5q> | Chinese audience, B站 |
+| 🌐 **YouTube (English)** | <https://www.youtube.com/watch?v=rxPFQV7zfMg> | English audience; same video, English title/copy |
 | 🎧 **NetEase Cloud Music** | <https://music.163.com/#/song?id=3422948585> | the song itself |
 | 🏠 **Brand site** | <https://music.zondev.top> | full catalog + lyric-video showcase |
 
 > The reference video is **not** redistributed in this repo. The stills in
 > [`showcase/`](showcase/) are redrawn from the same design tokens as the
-> shipped video. After the video goes live, drop the public URL into the table
-> above and into [`README.zh-CN.md`](README.zh-CN.md) — that keeps the
-> GitHub ↔ B站 ↔ YouTube ↔ music.zondev.top loop closed.
+> shipped video. The public video links above are mirrored in
+> [`README.zh-CN.md`](README.zh-CN.md), keeping the GitHub ↔ B站 ↔
+> YouTube ↔ music.zondev.top loop closed.
 
 ---
 
