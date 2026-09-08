@@ -1,0 +1,11 @@
+{
+  "video": "D:\\ZON\\codex\\lyric-mv-kit\\runs\\incision-and-code\\lyric-paper-staff-v1\\v20260908-01\\03_render\\incision-and-code-v4-intro-review.mp4",
+  "videoHash": "d301a45d93850c2d3af69c1b7195ec50d0415d689190bc099ddd882e10043deb",
+  "comparisonVideo": "D:\\ZON\\codex\\lyric-mv-kit\\runs\\incision-and-code\\lyric-paper-staff-v1\\v20260908-01\\03_render\\incision-and-code-v3-intro-comparator.mp4",
+  "comparisonVideoHash": "e5b054f4c4a819fcd2572de2c45d9644a44ad39db33a728887841614340e3f4b",
+  "duration": 15.5,
+  "status": "candidate-not-approved",
+  "decode": "pass",
+  "audio": "aac copied from original-source timeline at 1.0x",
+  "firstCharacterFocusFrame": "v4-943.jpg"
+}

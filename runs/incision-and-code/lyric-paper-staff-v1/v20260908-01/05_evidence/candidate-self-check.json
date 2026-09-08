@@ -1,0 +1,26 @@
+{
+  "scope": "candidate-only self-check; independent Reviewer still required",
+  "verdict": "pass-for-review",
+  "videoHash": "d301a45d93850c2d3af69c1b7195ec50d0415d689190bc099ddd882e10043deb",
+  "structuralChecks": {
+    "mp4Decode": "pass",
+    "h264_1920x1080_24fps": "pass",
+    "aac_44100Hz": "pass",
+    "duration_15p5s": "pass",
+    "originalSpeed": "pass",
+    "candidateNotApprovedOrUploadable": "pass"
+  },
+  "visualInspectionByBuilder": {
+    "titleAndArtistReadable": "pass at v4-000.jpg",
+    "staffAndEventDrivenNotesVisible": "pass at v4-650.jpg",
+    "firstCharacterFocus": "pass at v4-943.jpg; 公 starts at 09.430s",
+    "subsequentLyricReadability": "pass at v4-1120.jpg",
+    "comparisonEvidence": "v3-943.jpg"
+  },
+  "notTested": [
+    "full-song listening",
+    "user approval",
+    "platform upload",
+    "publication"
+  ]
+}

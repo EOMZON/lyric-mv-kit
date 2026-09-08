@@ -1,0 +1,37 @@
+{
+  "kind": "review-only optional v4 intro study",
+  "audio": {
+    "source": "D:\\ZON\\codex\\lyric-mv-kit\\samples\\review\\real-song-demos\\00_source\\incision-code\\netease.mp3",
+    "start": 0,
+    "duration": 15.5,
+    "speed": 1.0,
+    "audioHash": "a15121247221cd7e21e21a5cc60d2e3bde4f79e647a6c730da109212cd080a56"
+  },
+  "firstCharacter": {
+    "char": "公",
+    "start": 9.43,
+    "source": "v3 character-events.json"
+  },
+  "stages": [
+    {
+      "range": "0.00–3.00",
+      "change": "staff lines reveal"
+    },
+    {
+      "range": "3.00–7.00",
+      "change": "decorative notes accumulate only at measured audio events"
+    },
+    {
+      "range": "7.00–9.43",
+      "change": "staff converges into the reading panel"
+    },
+    {
+      "range": "9.43–15.50",
+      "change": "first line enters character-by-character using v3 measured timings"
+    }
+  ],
+  "notApproved": true,
+  "notForUpload": true,
+  "doesNotReplace": "D:\\ZON\\codex\\lyric-mv-kit\\runs\\incision-paper-full\\03_render\\incision-paper-full-v3-retained.mp4",
+  "noteSemantics": "decorative rhythmic notes, not pitch transcription"
+}
