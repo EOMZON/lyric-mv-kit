@@ -1,0 +1,12 @@
+{
+  "versionId": "v20260908-01",
+  "sourceDuration": 76.821,
+  "sourceAudioSha256": "2fed93650a62d4000ef59f932f50bbd3cf24ab9975fd31dd7b03a4ac2b04911b",
+  "originalAutomaticAlignmentSha256": "5bde02fcaec1e0402b4d71421a7d36d7d2a3e78d82c869d2f852769e6cad132c",
+  "displayCharacters": 197,
+  "canonicalText": "pass",
+  "issueCount": 0,
+  "manualListeningVerified": false,
+  "status": "candidate_structurally_valid_pending_manual_listening",
+  "issues": []
+}

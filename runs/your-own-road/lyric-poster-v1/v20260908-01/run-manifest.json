@@ -1,0 +1,21 @@
+{
+  "contractVersion": "mv-contract-v1",
+  "runId": "your-own-road-lyric-poster-v1-v20260908-01",
+  "versionId": "v20260908-01",
+  "canonicalId": "isrc-QZTB42619429",
+  "directoryAlias": "your-own-road",
+  "aliasScheme": "legacy-slug-from-existing-source.json",
+  "mappingEvidence": "../../../../your-own-road-poster-full/source.json",
+  "catalogSongId": "isrc-QZTB42619429",
+  "title": "路是你自己走",
+  "artist": "ROYAZON EOM",
+  "templateId": "lyric-poster-v1",
+  "templateVersion": "existing-run-adapter-read-only",
+  "createdAt": "2026-09-08T00:00:00+08:00",
+  "owner": "C-Builder MV04-attempt1",
+  "sourceRevision": "7dbdfc3fc41f0e74d9ee775120b0da832ddf5dec",
+  "actualDuration": 76.821,
+  "legacyCatalogDuration": 150,
+  "status": "timeline_candidate_pending_manual_listening",
+  "missingReason": "Nine forced-alignment zero-duration characters have a non-zero waveform-anchored candidate, but this Builder cannot represent an independent human listening verdict. No full MP4 is claimed."
+}

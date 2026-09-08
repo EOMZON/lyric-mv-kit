@@ -1,0 +1,13 @@
+{
+  "status": "read_only_preserved_by_reference",
+  "legacyRun": "D:/ZON/codex/lyric-mv-kit/runs/your-own-road-poster-full",
+  "sourceJson": "D:/ZON/codex/lyric-mv-kit/runs/your-own-road-poster-full/source.json",
+  "automaticAlignment": "D:/ZON/codex/lyric-mv-kit/runs/your-own-road-poster-full/aligned.json",
+  "automaticCheck": "D:/ZON/codex/lyric-mv-kit/runs/your-own-road-poster-full/alignment-check.json",
+  "audio": "D:/ZON/codex/lyric-mv-kit/samples/review/real-song-demos/00_source/your-own-road/youtube.webm",
+  "audioSha256": "2fed93650a62d4000ef59f932f50bbd3cf24ab9975fd31dd7b03a4ac2b04911b",
+  "audioDurationSeconds": 76.821,
+  "originalIssueCount": 9,
+  "originalIssueCharacters": ["赢", "忧", "里", "着", "控", "式", "向", "了", "谁"],
+  "preservationRule": "No legacy automatic JSON, source, audio, renderer, or output is overwritten by this version."
+}

@@ -1,0 +1,16 @@
+{
+  "title": {
+    "text": "路是你自己走",
+    "artist": "ROYAZON EOM",
+    "placement": "top-left",
+    "renderOccurrences": "persistent-header-only",
+    "prohibited": ["centered-intro-title", "centered-outro-title", "repeat-between-lyrics"]
+  },
+  "lyricDisplay": {
+    "sungTiming": "01_timeline/timing-candidate.json",
+    "retention": "keep-previous-line-visible-until-next-line-first-character-starts",
+    "interlude": "do-not-insert-repeated-title",
+    "tail": "keep-final-line-through-its-display-end; then fade without replacing it with title"
+  },
+  "status": "policy_for_next_render_only; shared-template code is not modified"
+}
