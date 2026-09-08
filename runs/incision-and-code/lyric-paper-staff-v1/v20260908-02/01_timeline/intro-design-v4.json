@@ -1,0 +1,35 @@
+{
+  "kind": "optional review-only v4 intro",
+  "duration": 15.5,
+  "audioStart": 0,
+  "audioSpeed": 1.0,
+  "firstCharacter": {
+    "char": "公",
+    "eventTime": 10.04,
+    "firstVisibleFrame": 241,
+    "firstVisibleTime": 10.041666666666666,
+    "frameRate": 24
+  },
+  "stages": [
+    {
+      "range": "0.000–3.000",
+      "change": "staff lines reveal"
+    },
+    {
+      "range": "3.000–7.000",
+      "change": "decorative notes at existing detected onset events"
+    },
+    {
+      "range": "7.000–10.042",
+      "change": "staff converges to lyric reading area"
+    },
+    {
+      "range": "10.042–15.500",
+      "change": "characters are quantized to 24fps from authoritative current render timing"
+    }
+  ],
+  "notApproved": true,
+  "notForUpload": true,
+  "doesNotReplace": "D:\\ZON\\codex\\lyric-mv-kit\\runs\\incision-paper-full\\03_render\\incision-paper-full-v3-retained.mp4",
+  "noteSemantics": "decorative rhythm cues, not pitch transcription"
+}

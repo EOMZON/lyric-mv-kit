@@ -1,0 +1,73 @@
+{
+  "status": "candidate-not-approved-awaiting-independent-review",
+  "v4": {
+    "path": "D:\\ZON\\codex\\lyric-mv-kit\\runs\\incision-and-code\\lyric-paper-staff-v1\\v20260908-02\\03_render\\incision-and-code-v4-intro-review.mp4",
+    "sha256": "f45795fd33cc1afd04a172182af6743cf9108f47c463d42ccdaa974a9f1e91cf",
+    "probe": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 1920,
+          "height": 1080,
+          "r_frame_rate": "24/1",
+          "duration": "15.500000",
+          "nb_frames": "372"
+        },
+        {
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "sample_rate": "44100",
+          "channels": 2,
+          "r_frame_rate": "0/0",
+          "duration": "15.500000",
+          "nb_frames": "669"
+        }
+      ],
+      "format": {
+        "duration": "15.500000"
+      }
+    }
+  },
+  "v3Comparator": {
+    "path": "D:\\ZON\\codex\\lyric-mv-kit\\runs\\incision-and-code\\lyric-paper-staff-v1\\v20260908-02\\03_render\\incision-and-code-v3-intro-comparator.mp4",
+    "sha256": "5dc706e58dffac44958f739b1d6dc1a54ef6e749a552cd2655105b4c736a7822",
+    "probe": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 1920,
+          "height": 1080,
+          "r_frame_rate": "24/1",
+          "duration": "15.500000",
+          "nb_frames": "372"
+        },
+        {
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "sample_rate": "44100",
+          "channels": 2,
+          "r_frame_rate": "0/0",
+          "duration": "15.500000",
+          "nb_frames": "669"
+        }
+      ],
+      "format": {
+        "duration": "15.500000"
+      }
+    },
+    "sourceInterval": "v3 0.000–15.500, re-encoded"
+  },
+  "firstCharacter": {
+    "char": "公",
+    "eventTime": 10.04,
+    "firstVisibleFrame": 241,
+    "firstVisibleTime": 10.041666666666666,
+    "frameRate": 24
+  }
+}

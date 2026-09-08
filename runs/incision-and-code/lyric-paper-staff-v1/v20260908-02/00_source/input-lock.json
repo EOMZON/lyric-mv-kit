@@ -1,0 +1,54 @@
+{
+  "immutableReadOnlyInputs": [
+    {
+      "kind": "v3 complete MP4",
+      "path": "D:\\ZON\\codex\\lyric-mv-kit\\runs\\incision-paper-full\\03_render\\incision-paper-full-v3-retained.mp4",
+      "sha256": "65d2300a47399715d61cb0b279fee5f893b17c3e3a2cc947bb3791741efb0fc0"
+    },
+    {
+      "kind": "source audio",
+      "path": "D:\\ZON\\codex\\lyric-mv-kit\\samples\\review\\real-song-demos\\00_source\\incision-code\\netease.mp3",
+      "sha256": "a15121247221cd7e21e21a5cc60d2e3bde4f79e647a6c730da109212cd080a56"
+    },
+    {
+      "kind": "lyrics",
+      "path": "D:\\ZON\\codex\\lyric-mv-kit\\runs\\incision-paper-full\\00_source\\lyrics.lrc",
+      "sha256": "6df40f756122262aceb3a068ac34fe775ca8e3a9857d31b5cac1a979345c6e28"
+    },
+    {
+      "kind": "authoritative current render character timing",
+      "path": "D:\\ZON\\codex\\lyric-mv-kit\\runs\\incision-paper-full\\01_timeline\\render-character-events.json",
+      "sha256": "d3b426000a117e9989bb0ded007766e8fa0e6be670abfa09ad450fb71a7769e7"
+    },
+    {
+      "kind": "v3 display timing",
+      "path": "D:\\ZON\\codex\\lyric-mv-kit\\runs\\incision-paper-full\\01_timeline\\display-events-v3.json",
+      "sha256": "1204a0cff13617146afb504695139e7d62b62e5bac801e248a6d18769648a66f"
+    },
+    {
+      "kind": "music events",
+      "path": "D:\\ZON\\codex\\lyric-mv-kit\\runs\\incision-paper-full\\01_timeline\\music-events.json",
+      "sha256": "971f4ab6801ea0f0c7cc9ca6de41cd43f6188eb68372d7f60c456e590f8dd616"
+    },
+    {
+      "kind": "template code",
+      "path": "D:\\ZON\\codex\\lyric-mv-kit\\samples\\review\\real-song-demos\\render_character_styles.py",
+      "sha256": "3ed2bc08259d8cf296ce58f7b94c5153d77383b6e1c75e4c0150670cef8445a0"
+    },
+    {
+      "kind": "font",
+      "path": "D:\\ZON\\codex\\lyric-mv-kit\\assets\\fonts\\reusable\\LongCang-Regular.ttf",
+      "sha256": "e5bf2c3f24ef2327c6f136d8f73e2f9dfdf44896fdbeb35a9515f44777bb91bc"
+    }
+  ],
+  "nativeDesign": "1280x720",
+  "output": "1920x1080 Lanczos upscaled",
+  "authoritativeFirstCharacter": {
+    "char": "公",
+    "eventTime": 10.04,
+    "firstVisibleFrame": 241,
+    "firstVisibleTime": 10.041666666666666,
+    "frameRate": 24
+  },
+  "manualListening": "not performed; independent listener required"
+}

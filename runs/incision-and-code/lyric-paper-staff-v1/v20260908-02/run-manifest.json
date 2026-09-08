@@ -1,0 +1,15 @@
+{
+  "contractVersion": "mv-contract-v1",
+  "runId": "MV03-attempt2",
+  "versionId": "v20260908-02",
+  "canonicalId": "incision-paper-full",
+  "directoryAlias": "incision-and-code",
+  "catalogSongId": "netease-song-3334952179",
+  "templateId": "lyric-paper-staff-v1",
+  "templateVersion": "existing-v3-04-paper-read-only",
+  "createdAt": "2026-09-08",
+  "owner": "C-Builder / MV03-attempt2",
+  "sourceRevision": "8f8a2cbb0da1aa813d107cf0692a6bf02b331c8a",
+  "status": "candidate-frozen-awaiting-independent-review",
+  "scope": "reviewer-requested replacement candidate; no v3 modification, upload, approval or deployment"
+}
