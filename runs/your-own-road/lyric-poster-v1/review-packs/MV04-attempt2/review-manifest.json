@@ -1,0 +1,266 @@
+{
+  "packId": "MV04-attempt2",
+  "purpose": "one-time human audition for the nine former zero-duration characters",
+  "sourceAudio": "D:\\ZON\\codex\\lyric-mv-kit\\samples\\review\\real-song-demos\\00_source\\your-own-road\\youtube.webm",
+  "sourceAudioSha256": "2fed93650a62d4000ef59f932f50bbd3cf24ab9975fd31dd7b03a4ac2b04911b",
+  "sourceDurationSeconds": 76.821,
+  "candidateReference": "../../v20260908-01/01_timeline/timing-candidate.json",
+  "automaticReference": "../../../your-own-road-poster-full/aligned.json",
+  "manualListeningVerified": false,
+  "reviewer": null,
+  "observedAt": null,
+  "verdict": "pending",
+  "items": [
+    {
+      "ordinal": 1,
+      "cueIndex": 5,
+      "cueNumber": 6,
+      "cueText": "摔了再起就算赢过忧愁",
+      "charIndex": 6,
+      "char": "赢",
+      "oldSpan": {
+        "start": 24.655,
+        "end": 24.655
+      },
+      "proposedSpan": {
+        "start": 24.57,
+        "end": 24.84
+      },
+      "clip": {
+        "path": "clips/01_cue06_赢_old-24p655-24p655_proposed-24p570-24p840_context-23p320-26p090.m4a",
+        "start": 23.32,
+        "end": 26.09,
+        "sha256": "d1790a7acd3b8593388c01a7d50927a3f48c423a030adc2cc4373e733ec82fc0"
+      },
+      "reviewer": null,
+      "observedAt": null,
+      "verdict": "pending",
+      "notes": "Do not infer a pass from the proposed span or from the clip's existence."
+    },
+    {
+      "ordinal": 2,
+      "cueIndex": 5,
+      "cueNumber": 6,
+      "cueText": "摔了再起就算赢过忧愁",
+      "charIndex": 8,
+      "char": "忧",
+      "oldSpan": {
+        "start": 25.335,
+        "end": 25.335
+      },
+      "proposedSpan": {
+        "start": 25.16,
+        "end": 25.38
+      },
+      "clip": {
+        "path": "clips/02_cue06_忧_old-25p335-25p335_proposed-25p160-25p380_context-23p910-26p630.m4a",
+        "start": 23.91,
+        "end": 26.63,
+        "sha256": "845064cf636371c9dad68372ece8a57fad7d49ddffd48fc723fba5bd98fa8331"
+      },
+      "reviewer": null,
+      "observedAt": null,
+      "verdict": "pending",
+      "notes": "Do not infer a pass from the proposed span or from the clip's existence."
+    },
+    {
+      "ordinal": 3,
+      "cueIndex": 6,
+      "cueNumber": 7,
+      "cueText": "谁在评论区里点名你抬头",
+      "charIndex": 5,
+      "char": "里",
+      "oldSpan": {
+        "start": 29.22,
+        "end": 29.22
+      },
+      "proposedSpan": {
+        "start": 29.13,
+        "end": 29.28
+      },
+      "clip": {
+        "path": "clips/03_cue07_里_old-29p220-29p220_proposed-29p130-29p280_context-27p880-30p530.m4a",
+        "start": 27.88,
+        "end": 30.53,
+        "sha256": "e6061297c2c385686055d46d55ccafbe36f96b0703dd11e88369053036c21e4f"
+      },
+      "reviewer": null,
+      "observedAt": null,
+      "verdict": "pending",
+      "notes": "Do not infer a pass from the proposed span or from the clip's existence."
+    },
+    {
+      "ordinal": 4,
+      "cueIndex": 7,
+      "cueNumber": 8,
+      "cueText": "敲着键盘以为掌控你的宇宙",
+      "charIndex": 1,
+      "char": "着",
+      "oldSpan": {
+        "start": 31.1,
+        "end": 31.1
+      },
+      "proposedSpan": {
+        "start": 31.02,
+        "end": 31.15
+      },
+      "clip": {
+        "path": "clips/04_cue08_着_old-31p100-31p100_proposed-31p020-31p150_context-29p770-32p400.m4a",
+        "start": 29.77,
+        "end": 32.4,
+        "sha256": "9a5ae3606224b34a1c31d64faf1d74f25156da6c640076de0fef2574d321ba42"
+      },
+      "reviewer": null,
+      "observedAt": null,
+      "verdict": "pending",
+      "notes": "Do not infer a pass from the proposed span or from the clip's existence."
+    },
+    {
+      "ordinal": 5,
+      "cueIndex": 7,
+      "cueNumber": 8,
+      "cueText": "敲着键盘以为掌控你的宇宙",
+      "charIndex": 7,
+      "char": "控",
+      "oldSpan": {
+        "start": 32.2,
+        "end": 32.2
+      },
+      "proposedSpan": {
+        "start": 32.12,
+        "end": 32.28
+      },
+      "clip": {
+        "path": "clips/05_cue08_控_old-32p200-32p200_proposed-32p120-32p280_context-30p870-33p530.m4a",
+        "start": 30.869999999999997,
+        "end": 33.53,
+        "sha256": "dab82d4c7bed0fc9ddf7d3be0d8250242305dd2b527d34b1fce11db92ab48763"
+      },
+      "reviewer": null,
+      "observedAt": null,
+      "verdict": "pending",
+      "notes": "Do not infer a pass from the proposed span or from the clip's existence."
+    },
+    {
+      "ordinal": 6,
+      "cueIndex": 8,
+      "cueNumber": 9,
+      "cueText": "我把这些噪音关成静音模式",
+      "charIndex": 11,
+      "char": "式",
+      "oldSpan": {
+        "start": 35.44,
+        "end": 35.44
+      },
+      "proposedSpan": {
+        "start": 35.34,
+        "end": 35.52
+      },
+      "clip": {
+        "path": "clips/06_cue09_式_old-35p440-35p440_proposed-35p340-35p520_context-34p090-36p770.m4a",
+        "start": 34.09,
+        "end": 36.77,
+        "sha256": "4402d282e51cf5f1360fba2d2af4d8c1bce3f380c7552fd327a68876d16321d2"
+      },
+      "reviewer": null,
+      "observedAt": null,
+      "verdict": "pending",
+      "notes": "Do not infer a pass from the proposed span or from the clip's existence."
+    },
+    {
+      "ordinal": 7,
+      "cueIndex": 10,
+      "cueNumber": 11,
+      "cueText": "不必向谁低头",
+      "charIndex": 2,
+      "char": "向",
+      "oldSpan": {
+        "start": 38.74,
+        "end": 38.74
+      },
+      "proposedSpan": {
+        "start": 38.67,
+        "end": 38.77
+      },
+      "clip": {
+        "path": "clips/07_cue11_向_old-38p740-38p740_proposed-38p670-38p770_context-37p420-40p020.m4a",
+        "start": 37.42,
+        "end": 40.02,
+        "sha256": "159cff5f3296535424cce5904ba36ae4153c0f60abfd7ed427d5a7b5d9b027cd"
+      },
+      "reviewer": null,
+      "observedAt": null,
+      "verdict": "pending",
+      "notes": "Do not infer a pass from the proposed span or from the clip's existence."
+    },
+    {
+      "ordinal": 8,
+      "cueIndex": 13,
+      "cueNumber": 14,
+      "cueText": "摔了再起就算赢过忧愁",
+      "charIndex": 1,
+      "char": "了",
+      "oldSpan": {
+        "start": 45.28,
+        "end": 45.28
+      },
+      "proposedSpan": {
+        "start": 45.2,
+        "end": 45.32
+      },
+      "clip": {
+        "path": "clips/08_cue14_了_old-45p280-45p280_proposed-45p200-45p320_context-43p950-46p570.m4a",
+        "start": 43.95,
+        "end": 46.57,
+        "sha256": "df1e10ee1882249333c5633899efa80bbeb612a2875b63be66c8eac710e5e97b"
+      },
+      "reviewer": null,
+      "observedAt": null,
+      "verdict": "pending",
+      "notes": "Do not infer a pass from the proposed span or from the clip's existence."
+    },
+    {
+      "ordinal": 9,
+      "cueIndex": 18,
+      "cueNumber": 19,
+      "cueText": "不必向谁低头",
+      "charIndex": 3,
+      "char": "谁",
+      "oldSpan": {
+        "start": 60.275,
+        "end": 60.275
+      },
+      "proposedSpan": {
+        "start": 60.35,
+        "end": 60.53
+      },
+      "clip": {
+        "path": "clips/09_cue19_谁_old-60p275-60p275_proposed-60p350-60p530_context-59p025-61p780.m4a",
+        "start": 59.025,
+        "end": 61.78,
+        "sha256": "74dceb43146d00f19f7ce566b16877e723cc6eb1b316db7b0e385432389d38a9"
+      },
+      "reviewer": null,
+      "observedAt": null,
+      "verdict": "pending",
+      "notes": "Do not infer a pass from the proposed span or from the clip's existence."
+    }
+  ],
+  "orderedAudition": {
+    "path": "MV04-attempt2-ordered-audition.m4a",
+    "sha256": "537739e97521f5a24352247dc8f75254f5ae27dd75f17f073e4e3d604b1e1eaf",
+    "order": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ]
+  },
+  "generatedAt": "2026-09-08T07:43:53.910920+00:00",
+  "generationCommand": "build_listening_pack.py (short-context AAC extraction only; no alignment, separation, or video render)"
+}
