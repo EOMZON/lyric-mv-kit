@@ -1,0 +1,12 @@
+{
+  "window": [
+    0.4,
+    69.7
+  ],
+  "frames_audited": 1664,
+  "chars_measured": 12957,
+  "min_coverage": 0.2186,
+  "median_coverage": 0.3847,
+  "blank_characters": [],
+  "verdict": "PASS"
+}
