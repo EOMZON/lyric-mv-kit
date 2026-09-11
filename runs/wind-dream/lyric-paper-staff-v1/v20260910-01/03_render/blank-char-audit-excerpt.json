@@ -5,8 +5,8 @@
   ],
   "frames_audited": 528,
   "chars_measured": 4567,
-  "min_coverage": 0.2191,
-  "median_coverage": 0.3984,
+  "min_coverage": 0.2253,
+  "median_coverage": 0.4014,
   "blank_characters": [],
   "verdict": "PASS"
 }

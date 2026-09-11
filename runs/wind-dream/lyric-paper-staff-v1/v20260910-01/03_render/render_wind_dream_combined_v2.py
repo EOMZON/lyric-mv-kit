@@ -210,9 +210,142 @@ def char_glyph(ch, size, color):
     return cropped.resize((cropped.width, max(1, int(cropped.height * STRETCH))), Image.Resampling.LANCZOS)
 
 
-@lru_cache(maxsize=12)
+# Ambient-motion master switches (added 2026-09-11: the original frame was
+# visually static apart from the per-char float, so the song felt lifeless).
+VIZ = True          # master on/off for all ambient layers below
+BG_DRIFT = True     # slow parallax drift of the watercolour backdrop
+GLOW = True         # warm breathing halo behind the lyric box, pulses on beats
+SPECTRUM = True     # bottom full-width spectrum bar (the "song visualizer")
+NOTES = True        # beat-synced eighth-notes floating up through the margins
+PARTICLES = True    # faint dust/sparkle that twinkles with treble
+
+BG_MARGIN = 36      # px of slack so the drift never exposes an edge
+
+
+@lru_cache(maxsize=1)
 def background():
-    return Image.open(BG).convert('RGBA').resize((W, H), Image.Resampling.LANCZOS)
+    """Watercolour backdrop, slightly oversized so BG_DRIFT can shift it."""
+    return Image.open(BG).convert('RGBA').resize((W + 2 * BG_MARGIN, H + 2 * BG_MARGIN),
+                                                Image.Resampling.LANCZOS)
+
+
+def drifted_bg(t):
+    bg = background()
+    if not BG_DRIFT:
+        return bg.crop((BG_MARGIN, BG_MARGIN, BG_MARGIN + W, BG_MARGIN + H))
+    dx = int(BG_MARGIN + 11 * math.sin(t * 0.18) + 4 * math.sin(t * 0.07))
+    dy = int(BG_MARGIN + 8 * math.sin(t * 0.13 + 1.3) + 3 * math.sin(t * 0.05 + 0.7))
+    dx = max(0, min(BG_MARGIN * 2, dx)); dy = max(0, min(BG_MARGIN * 2, dy))
+    return bg.crop((dx, dy, dx + W, dy + H))
+
+
+@lru_cache(maxsize=1)
+def _glow_sprite():
+    """Radial warm gradient, drawn once and reused (scaled per frame)."""
+    S = 256
+    yy, xx = np.mgrid[0:S, 0:S].astype(np.float32)
+    c = S / 2.0
+    dist = np.sqrt((xx - c) ** 2 + (yy - c) ** 2) / c
+    a = (np.clip(1 - dist, 0, 1) ** 2 * 255).astype(np.uint8)
+    spr = np.zeros((S, S, 4), np.uint8)
+    spr[..., 0] = 255; spr[..., 1] = 240; spr[..., 2] = 175; spr[..., 3] = a
+    return Image.fromarray(spr, 'RGBA')
+
+
+def note(d, x, y, size, color):
+    """Vector eighth note (no font dependency, scales cleanly at any size)."""
+    d.ellipse((x - size * .3, y - size * .12, x + size * .3, y + size * .15), fill=color)
+    d.line((x + size * .25, y, x + size * .25, y - size), fill=color, width=max(1, round(size * .1)))
+    d.line((x + size * .25, y - size, x + size * .62, y - size * .66), fill=color, width=max(1, round(size * .11)))
+
+
+def _note_schedule(features):
+    """Deterministic per-beat spawn plan -> keeps notes out of the lyric box
+    (x0=65,y0=450,w=790,h=225) by confining them to the right margin + top band."""
+    rng = np.random.RandomState(20260911)
+    sched = []
+    for i, bt in enumerate(features['beats']):
+        zone = i % 3
+        if zone == 0:
+            x, y0, rise = rng.uniform(905, 1235), rng.uniform(150, 470), -rng.uniform(120, 210)
+        elif zone == 1:
+            x, y0, rise = rng.uniform(905, 1235), rng.uniform(480, 690), -rng.uniform(120, 200)
+        else:
+            x, y0, rise = rng.uniform(120, 815), rng.uniform(70, 300), -rng.uniform(90, 160)
+        sched.append((float(bt), float(x), float(y0), float(rise),
+                      float(rng.uniform(9, 15)), float(rng.uniform(0, 6.28))))
+    return sched
+
+
+def draw_visualizer(canvas, t, n, features):
+    """All ambient motion layers, composited behind the lyrics."""
+    if not VIZ:
+        return
+    bands = features['bands'][min(n, len(features['bands']) - 1)]
+    pulse = float(features['pulse'][min(n, len(features['pulse']) - 1)])
+    bass = float(features['bass'][min(n, len(features['bass']) - 1)])
+    treble = float(features['treble'][min(n, len(features['treble']) - 1)])
+    rms = float(features['rms'][min(n, len(features['rms']) - 1)])
+
+    # 1) breathing halo behind the lyric box
+    if GLOW:
+        g = _glow_sprite()
+        energy = 0.10 + 0.30 * pulse + 0.12 * bass
+        dia = int((210 + 70 * pulse + 30 * bass) * 2)
+        g = g.resize((dia, dia), Image.Resampling.LANCZOS)
+        g.putalpha(g.getchannel('A').point(lambda a: int(a * energy)))
+        cx, cy = BOX[0] + BOX[2] // 2, BOX[1] + BOX[3] // 2
+        canvas.alpha_composite(g, (cx - dia // 2, cy - dia // 2))
+
+    # 2) bottom spectrum bar (capped below the lyric box's bottom edge)
+    if SPECTRUM:
+        d = ImageDraw.Draw(canvas)
+        NB = 64
+        x0, total, bw = 36, W - 72, (W - 72) // NB
+        base_y = 716
+        for j in range(NB):
+            bi = int(j / NB * 95)
+            v = float(bands[bi] + bands[min(bi + 1, 95)]) / 2
+            h = 6 + min(34, v * 30)
+            x = x0 + j * bw
+            a = int(55 + 95 * min(1.0, v))
+            d.rounded_rectangle([x, base_y - h, x + bw - 3, base_y], radius=min(3, bw // 2),
+                                fill=(255, 240, 170, a))
+        d.line((x0, base_y + 2, x0 + total, base_y + 2), fill=(255, 240, 170, 60), width=1)
+
+    # 3) floating dust / sparkle that twinkles with treble (margins only)
+    if PARTICLES:
+        d = ImageDraw.Draw(canvas)
+        for i in range(26):
+            px = (0.10 + 0.80 * ((i * 73) % 97) / 97) * W
+            py = (((i * 131) % 211) / 211) * H
+            y = (py - (t * 7 + i * 13) % H) % H
+            x = px + 6 * math.sin(t * 0.6 + i)
+            if not (x > 880 or y < 420 or x < 55):
+                continue  # keep the lyric area and title clear
+            tw = 0.5 + 0.5 * math.sin(t * 1.7 + i * 2.1)
+            a = int((22 + 55 * treble) * tw)
+            if a <= 0:
+                continue
+            r = 1 + (i % 3)
+            d.ellipse((x - r, y - r, x + r, y + r), fill=(255, 245, 200, a))
+
+    # 4) beat-synced eighth notes rising through the margins
+    if NOTES:
+        d = ImageDraw.Draw(canvas)
+        LIFE = 2.2
+        for bt, x, y0, rise, size, ph in _note_schedule(features):
+            age = t - bt
+            if age < 0 or age > LIFE:
+                continue
+            k = age / LIFE
+            y = y0 + rise * k
+            xo = x + 10 * math.sin(age * 2 + ph)
+            fade = min(1, age / 0.3) * (1 - k)
+            a = int(175 * fade)
+            if a <= 0:
+                continue
+            note(d, xo, y, size + 5 * math.sin(min(1, age / .3) * math.pi / 2), (255, 240, 170, a))
 
 
 def mix(a, b, w):
@@ -284,7 +417,9 @@ def char_box(p, t, ch):
 
 def frame(n, cues, features):
     t = n / FPS
-    canvas = background().copy()
+    canvas = drifted_bg(t)
+    if VIZ:
+        draw_visualizer(canvas, t, n, features)
     d = ImageDraw.Draw(canvas)
     d.text((48, 28), f'{SONG_TITLE} / {ARTIST}', font=UTILITY, fill=(255, 255, 255, 160))
     active = next((c for c in cues if c['start'] - .12 <= t < c['end'] + .45), None)
