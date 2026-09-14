@@ -1,0 +1,318 @@
+{
+  "design_brief": {
+    "job": "22-second dynamic lyric motion review",
+    "priority": "continuous wind-wave lyric field",
+    "secondary": "low-alpha particles, smooth halo, restrained wave"
+  },
+  "parameters": {
+    "fps": 24,
+    "size": [
+      1280,
+      720
+    ],
+    "highlight": "raised cosine spatial wind field, #FFF9E7",
+    "wave_lift_px": 5.0,
+    "wave_scale": 0.02,
+    "line_breathe_px": 1.2,
+    "crossfade": 0.24,
+    "background_drift_px": [
+      4,
+      3
+    ],
+    "particles": 15,
+    "halo_alpha_max": 34,
+    "wave_segments": 20
+  },
+  "inputs": {
+    "alignment": "D:\\ZON\\codex\\lyric-mv-kit\\runs\\wind-dream\\lyric-paper-staff-v1\\v20260910-01\\03_alignment\\forced_alignment.json",
+    "audio": "D:\\ZON\\codex\\lyric-mv-kit\\samples\\review\\real-song-demos\\00_source\\wind-dream\\netease.mp3",
+    "background": "D:\\ZON\\codex\\lyric-mv-kit\\samples\\review\\references\\style-faithful\\003-wind-dream-bg.png"
+  },
+  "output": {
+    "path": "D:\\ZON\\codex\\lyric-mv-kit\\runs\\wind-dream\\lyric-paper-staff-v1\\v20260910-01\\03_render\\v4-dynamic-smooth\\wind-dream-v4-dynamic-smooth.mp4",
+    "sha256": "8195e0b93f6e29d3ae3ed39e8d7a6d007e22a0f45f93574f61d8869575e0e8ef",
+    "media": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 1280,
+          "height": 720,
+          "r_frame_rate": "24/1",
+          "nb_frames": "528"
+        },
+        {
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "r_frame_rate": "0/0",
+          "nb_frames": "1033"
+        }
+      ],
+      "format": {
+        "duration": "22.000000"
+      }
+    }
+  },
+  "checks": {
+    "decode": "pass",
+    "audit": {
+      "crossfade_seconds": 0.24,
+      "all_transitions_pass": true,
+      "transitions": [
+        {
+          "from": "朝我飞来",
+          "to": "当两束纸飞机在天空重叠",
+          "start": 0.7999999999999992,
+          "end": 1.0399999999999991,
+          "overlap_frames": 5,
+          "pass": true
+        },
+        {
+          "from": "当两束纸飞机在天空重叠",
+          "to": "跑道瞬间被云写成五线谱",
+          "start": 4.100000000000003,
+          "end": 4.340000000000003,
+          "overlap_frames": 4,
+          "pass": true
+        },
+        {
+          "from": "跑道瞬间被云写成五线谱",
+          "to": "你的笑像音符跳跃着",
+          "start": 7.159999999999998,
+          "end": 7.399999999999999,
+          "overlap_frames": 4,
+          "pass": true
+        },
+        {
+          "from": "你的笑像音符跳跃着",
+          "to": "我的心被旋律牵动着",
+          "start": 9.839999999999998,
+          "end": 10.079999999999998,
+          "overlap_frames": 5,
+          "pass": true
+        },
+        {
+          "from": "我的心被旋律牵动着",
+          "to": "奔向重逢那刻",
+          "start": 12.960000000000003,
+          "end": 13.200000000000003,
+          "overlap_frames": 5,
+          "pass": true
+        },
+        {
+          "from": "奔向重逢那刻",
+          "to": "我数着纸飞机的影子练马拉松配速",
+          "start": 16.74,
+          "end": 16.979999999999997,
+          "overlap_frames": 4,
+          "pass": true
+        },
+        {
+          "from": "我数着纸飞机的影子练马拉松配速",
+          "to": "每一步都是向你靠近的乐谱",
+          "start": 19.66,
+          "end": 19.9,
+          "overlap_frames": 4,
+          "pass": true
+        }
+      ],
+      "max_highlight_delta_per_frame": 0.14180039889378093,
+      "max_lyric_delta_y": 0.7404170238401313,
+      "max_lyric_delta_scale": 0.002836007977875619,
+      "layout": {
+        "safe_rect": {
+          "left": 12,
+          "top": 12,
+          "right": 1268,
+          "bottom": 708
+        },
+        "actual_ink_bounds": {
+          "min_x": 65,
+          "min_y": 279,
+          "max_x": 985.0,
+          "max_y": 672
+        },
+        "shadow_inclusive_bounds": {
+          "min_x": 58,
+          "min_y": 272,
+          "max_x": 996.0,
+          "max_y": 683
+        },
+        "dynamic_shadow_bounds": {
+          "min_x": 55,
+          "min_y": 262.8,
+          "max_x": 999.0,
+          "max_y": 687.2
+        },
+        "glyph_count": 170,
+        "overflow": 0,
+        "overflow_examples": []
+      },
+      "environment_envelope": {
+        "attack_seconds": 0.25,
+        "release_seconds": 0.35,
+        "max_delta": 0.14926053088923633,
+        "p95_delta": 0.05173946536431809
+      },
+      "raw_extremes": {
+        "shortest": [
+          [
+            "写",
+            0.04000000000000625
+          ],
+          [
+            "的",
+            0.11999999999999744
+          ],
+          [
+            "吹",
+            0.120000000000001
+          ],
+          [
+            "拉",
+            0.13999999999999346
+          ],
+          [
+            "约",
+            0.13999999999999968
+          ],
+          [
+            "纸",
+            0.14
+          ],
+          [
+            "别",
+            0.14000000000000057
+          ],
+          [
+            "历",
+            0.14000000000000057
+          ]
+        ],
+        "longest": [
+          [
+            "分",
+            2.4399999999999995
+          ],
+          [
+            "奔",
+            2.299999999999997
+          ],
+          [
+            "朝",
+            1.0199999999999996
+          ],
+          [
+            "仰",
+            1.019999999999996
+          ],
+          [
+            "跑",
+            0.9800000000000004
+          ],
+          [
+            "乐",
+            0.9200000000000017
+          ],
+          [
+            "梦",
+            0.9199999999999999
+          ],
+          [
+            "了",
+            0.9000000000000004
+          ]
+        ]
+      },
+      "render_only_grid_note": "No timing override applied: source timing preserved; hypothetical min-4-frame durations listed below.",
+      "minimum_4_frame_normalized_preview": [
+        [
+          "纸",
+          4
+        ],
+        [
+          "飞",
+          4
+        ],
+        [
+          "机",
+          4
+        ],
+        [
+          "盘",
+          5
+        ],
+        [
+          "旋",
+          7
+        ],
+        [
+          "着",
+          7
+        ],
+        [
+          "风",
+          9
+        ],
+        [
+          "穿",
+          7
+        ],
+        [
+          "过",
+          8
+        ],
+        [
+          "指",
+          8
+        ],
+        [
+          "尖",
+          8
+        ],
+        [
+          "的",
+          10
+        ],
+        [
+          "梦",
+          22
+        ],
+        [
+          "跑",
+          24
+        ],
+        [
+          "道",
+          5
+        ],
+        [
+          "隐",
+          5
+        ],
+        [
+          "约",
+          4
+        ],
+        [
+          "拉",
+          6
+        ],
+        [
+          "长",
+          11
+        ],
+        [
+          "了",
+          22
+        ]
+      ]
+    }
+  },
+  "untested": [
+    "manual listening review",
+    "full-song render"
+  ]
+}
