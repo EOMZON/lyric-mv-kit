@@ -17,9 +17,10 @@ FFMPEG = Path(r'D:\ZON\runtime\media-tools\Library\bin\ffmpeg.exe')
 FFPROBE = Path(r'D:\ZON\runtime\media-tools\Library\bin\ffprobe.exe')
 W,H,FPS,START,DURATION = 1280,720,24,29.5,22.0
 N = int(DURATION * FPS)
-INK = ImageColor.getrgb('#fff071'); ACCENT=(255,249,231); BOX=(65,450,790,225)
+INK = ImageColor.getrgb('#fff071'); ACCENT=(255,249,231); BOX=(65,365,790,225)
 SIZE, TRACKING, STRETCH = 156,-4,1.12
 CROSSFADE=.24; CURSOR_RAMP=.46  # raised-cosine step <= .143 at 24 fps
+SAFE_MARGIN=12; SHADOW_OFFSET=(2,2); SHADOW_EXTENT=9  # GaussianBlur(3) conservative bounds
 BREAKS = {'跑道隐约拉长了影踪':'跑道隐约\n拉长了影踪','分别后我把日历撕成纸飞机':'分别后我把日历\n撕成纸飞机','窗台风吹得日子乱成跑道':'窗台风吹得日子\n乱成跑道','远方却像地图上的迷宫':'远方却像\n地图上的迷宫','你会不会也折一架机翼':'你会不会也\n折一架机翼','跑道瞬间被云写成五线谱':'跑道瞬间被云\n写成五线谱','你的笑像音符跳跃着':'你的笑像\n音符跳跃着','我的心被旋律牵动着':'我的心被\n旋律牵动着','只盼你会接住那份信仰':'只盼你会\n接住那份信仰','我数着纸飞机的影子练马拉松配速':'我数着纸飞机的影子\n练马拉松配速'}
 
 def smooth(x):
@@ -52,14 +53,17 @@ def glyph(ch,size):
     f=ImageFont.truetype(str(FONT),size); q=Image.new('L',(size*2,size*2)); d=ImageDraw.Draw(q)
     b=d.textbbox((0,0),ch,font=f); d.text((-b[0],-b[1]),ch,font=f,fill=255)
     return q.crop((0,0,b[2]-b[0],b[3]-b[1])).resize((b[2]-b[0],max(1,round((b[3]-b[1])*STRETCH))),Image.Resampling.LANCZOS)
-def lines(text): return BREAKS.get(text,text).splitlines()
+def lines(text):
+    # Six LongCang glyphs remain legible at the established scale.  Reflow only
+    # render copies of long rows; alignment/source text stay untouched.
+    return [row[i:i+6] for row in BREAKS.get(text,text).splitlines() for i in range(0,len(row),6)]
 @lru_cache(maxsize=32)
 def layout(text):
-    rows=lines(text); f=ImageFont.truetype(str(FONT),SIZE); out=[]; lineh=round(SIZE*STRETCH); total=lineh*len(rows)+round(SIZE*.1)*(len(rows)-1); top=BOX[1]+(BOX[3]-total)//2; k=0
+    rows=lines(text); size=SIZE if len(rows)<=2 else 112; f=ImageFont.truetype(str(FONT),size); out=[]; lineh=round(size*STRETCH); total=lineh*len(rows)+round(size*.1)*(len(rows)-1); top=BOX[1]+(BOX[3]-total)//2; k=0
     for r,row in enumerate(rows):
         widths=[f.getlength(ch)+TRACKING for ch in row]; x=BOX[0]
         for ch,adv in zip(row,widths):
-            g=glyph(ch,SIZE); out.append((k,x,top+r*(lineh+round(SIZE*.1))+(lineh-g.height)//2,g)); x+=adv; k+=1
+            g=glyph(ch,size); out.append((k,x,top+r*(lineh+round(size*.1))+(lineh-g.height)//2,g)); x+=adv; k+=1
     return out
 def cue_alpha(t,i,cues):
     c=cues[i]; a=smooth((t-(c['start']-CROSSFADE))/CROSSFADE)
@@ -77,12 +81,26 @@ def draw_cue(canvas,t,cue,alpha):
     for idx,x,y,mask in layout(cue['text']):
         w=char_weight(t,cue['chars'][idx]); col=mix(INK,ACCENT,w)
         a=mask.point(lambda p:round(p*alpha)); shadow=Image.new('RGBA',mask.size,(24,35,62,0)); shadow.putalpha(a.filter(ImageFilter.GaussianBlur(3)))
-        canvas.alpha_composite(shadow,(round(x+2),round(y+2))); ink=Image.new('RGBA',mask.size,col+(255,)); ink.putalpha(a); canvas.alpha_composite(ink,(round(x),round(y)))
+        canvas.alpha_composite(shadow,(round(x+SHADOW_OFFSET[0]),round(y+SHADOW_OFFSET[1]))); ink=Image.new('RGBA',mask.size,col+(255,)); ink.putalpha(a); canvas.alpha_composite(ink,(round(x),round(y)))
 def frame(n,cues):
     t=n/FPS; dx=round(4*math.sin(2*math.pi*t/25)); dy=round(3*math.sin(2*math.pi*t/23+1.1)); base=bg().crop((4+dx,4+dy,4+dx+W,4+dy+H)).convert('RGBA')
     d=ImageDraw.Draw(base); utility=ImageFont.truetype('C:/Windows/Fonts/msyh.ttc',18); d.text((48,28),'风穿过指尖的梦 / 音右',font=utility,fill=(255,255,255,145))
     for i,c in enumerate(cues): draw_cue(base,t,c,cue_alpha(t,i,cues))
     fade=min(smooth(t/.25),smooth((DURATION-t)/.35)); return Image.blend(Image.new('RGB',(W,H),(12,14,19)),base.convert('RGB'),fade)
+def layout_audit(cues):
+    """Bounds of actual nonzero glyph pixels and their conservative blurred shadows."""
+    safe=(SAFE_MARGIN,SAFE_MARGIN,W-SAFE_MARGIN,H-SAFE_MARGIN); glyphs=[]
+    for cue in cues:
+        for idx,x,y,mask in layout(cue['text']):
+            bb=mask.getbbox()
+            if not bb: continue
+            ink=(x+bb[0],y+bb[1],x+bb[2],y+bb[3])
+            shadow=(ink[0]+SHADOW_OFFSET[0]-SHADOW_EXTENT,ink[1]+SHADOW_OFFSET[1]-SHADOW_EXTENT,ink[2]+SHADOW_OFFSET[0]+SHADOW_EXTENT,ink[3]+SHADOW_OFFSET[1]+SHADOW_EXTENT)
+            glyphs.append({'cue':cue['text'],'char':cue['chars'][idx]['char'],'ink':ink,'shadow':shadow})
+    boxes=[g['ink'] for g in glyphs]+[g['shadow'] for g in glyphs]
+    overall=(min(b[0] for b in boxes),min(b[1] for b in boxes),max(b[2] for b in boxes),max(b[3] for b in boxes))
+    offenders=[g for g in glyphs if g['shadow'][0]<safe[0] or g['shadow'][1]<safe[1] or g['shadow'][2]>safe[2] or g['shadow'][3]>safe[3]]
+    return {'safe_rect':{'left':safe[0],'top':safe[1],'right':safe[2],'bottom':safe[3]},'actual_ink_bounds':{'min_x':min(g['ink'][0] for g in glyphs),'min_y':min(g['ink'][1] for g in glyphs),'max_x':max(g['ink'][2] for g in glyphs),'max_y':max(g['ink'][3] for g in glyphs)},'shadow_inclusive_bounds':{'min_x':overall[0],'min_y':overall[1],'max_x':overall[2],'max_y':overall[3]},'glyph_count':len(glyphs),'overflow':len(offenders),'overflow_examples':offenders[:3]}
 def audit(cues):
     weights=[]; alphas=[]
     for n in range(N):
@@ -94,7 +112,7 @@ def audit(cues):
         if b < 0 or a > DURATION: continue
         transitions.append({'from':cues[i]['text'],'to':cues[i+1]['text'],'start':a,'end':b,'overlap_frames':len(overlap),'pass':len(overlap)>=4})
     raw=[(x['char'],x['raw_end']-x['raw_start']) for c in cues for x in c['chars']]; norm=[(x['char'],max(4,round((x['end']-x['start'])*FPS))) for c in cues for x in c['chars']]
-    return {'crossfade_seconds':CROSSFADE,'all_transitions_pass':all(x['pass'] for x in transitions),'transitions':transitions,'max_highlight_delta_per_frame':maxdw,'max_lyric_delta_y':0,'max_lyric_delta_scale':0,'raw_extremes':{'shortest':sorted(raw,key=lambda x:x[1])[:8],'longest':sorted(raw,key=lambda x:x[1],reverse=True)[:8]},'render_only_grid_note':'No timing override applied: source timing preserved; hypothetical min-4-frame durations listed below.','minimum_4_frame_normalized_preview':norm[:20]}
+    return {'crossfade_seconds':CROSSFADE,'all_transitions_pass':all(x['pass'] for x in transitions),'transitions':transitions,'max_highlight_delta_per_frame':maxdw,'max_lyric_delta_y':0,'max_lyric_delta_scale':0,'layout':layout_audit(cues),'raw_extremes':{'shortest':sorted(raw,key=lambda x:x[1])[:8],'longest':sorted(raw,key=lambda x:x[1],reverse=True)[:8]},'render_only_grid_note':'No timing override applied: source timing preserved; hypothetical min-4-frame durations listed below.','minimum_4_frame_normalized_preview':norm[:20]}
 def probe(path): return json.loads(subprocess.check_output([str(FFPROBE),'-v','error','-show_entries','format=duration:stream=codec_type,codec_name,r_frame_rate,nb_frames,width,height','-of','json',str(path)]))
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument('--preview',action='store_true'); args=ap.parse_args(); cues=chars_from_alignment(); audit_data=audit(cues)

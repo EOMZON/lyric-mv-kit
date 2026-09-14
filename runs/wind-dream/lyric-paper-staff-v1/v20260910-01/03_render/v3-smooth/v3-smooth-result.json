@@ -28,7 +28,7 @@
   },
   "output": {
     "path": "D:\\ZON\\codex\\lyric-mv-kit\\runs\\wind-dream\\lyric-paper-staff-v1\\v20260910-01\\03_render\\v3-smooth\\wind-dream-v3-smooth.mp4",
-    "sha256": "20a84b97165c6dc88b76c4cd54034035aeae780884c65dff443129728308635a",
+    "sha256": "920f01f29e2442763fa80907f97492ade73ba048d51269879170ccb2188be3d2",
     "media": {
       "programs": [],
       "stream_groups": [],
@@ -119,6 +119,29 @@
       "max_highlight_delta_per_frame": 0.1418003988937846,
       "max_lyric_delta_y": 0,
       "max_lyric_delta_scale": 0,
+      "layout": {
+        "safe_rect": {
+          "left": 12,
+          "top": 12,
+          "right": 1268,
+          "bottom": 708
+        },
+        "actual_ink_bounds": {
+          "min_x": 65,
+          "min_y": 279,
+          "max_x": 985.0,
+          "max_y": 672
+        },
+        "shadow_inclusive_bounds": {
+          "min_x": 58,
+          "min_y": 272,
+          "max_x": 996.0,
+          "max_y": 683
+        },
+        "glyph_count": 170,
+        "overflow": 0,
+        "overflow_examples": []
+      },
       "raw_extremes": {
         "shortest": [
           [
