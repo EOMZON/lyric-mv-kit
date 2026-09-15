@@ -1,0 +1,10 @@
+{
+  "id": "beat-push",
+  "version": 1,
+  "label": "Beat Push / 节拍冲击",
+  "recommended_style": "D_kinetic_poster",
+  "use_when": "节奏强、说唱、电子或副歌冲击明显",
+  "camera": {"pan_x_px": 5, "pan_y_px": 4, "progress_x_px": 18, "progress_y_px": -8, "cue_sway_px": 16, "zoom": 0.018, "period_seconds": 5.2},
+  "parallax": {"background": 0.24, "foreground": 1.0},
+  "audio_reactivity": {"bass_zoom": 0.018, "bass_push_y_px": 8, "treble_sway_x_px": 2.5}
+}
