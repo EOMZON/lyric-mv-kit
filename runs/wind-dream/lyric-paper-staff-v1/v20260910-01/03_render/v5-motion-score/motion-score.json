@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "id": "wind-dream-v5-motion-score",
+  "template": "type-camera",
+  "window": {"source_start_seconds": 29.5, "duration_seconds": 22.0},
+  "intent": "One continuous right/upward journey: overlap -> runway -> melody -> reunion peak -> settle. No per-character jumping.",
+  "segments": [
+    {"start": 0.00, "end": 1.04, "easing": "sine", "from": {"x": -18, "y": 8, "scale": 1.018}, "to": {"x": -6, "y": 4, "scale": 1.024}},
+    {"start": 1.04, "end": 4.34, "easing": "ease_in_out", "from": {"x": -6, "y": 4, "scale": 1.024}, "to": {"x": 24, "y": -6, "scale": 1.045}},
+    {"start": 4.34, "end": 7.40, "easing": "ease_in_out", "from": {"x": 24, "y": -6, "scale": 1.045}, "to": {"x": 78, "y": -14, "scale": 1.052}},
+    {"start": 7.40, "end": 10.08, "easing": "sine", "from": {"x": 78, "y": -14, "scale": 1.052}, "to": {"x": 96, "y": -34, "scale": 1.060}},
+    {"start": 10.08, "end": 13.20, "easing": "ease_in", "from": {"x": 96, "y": -34, "scale": 1.060}, "to": {"x": 118, "y": -42, "scale": 1.072}},
+    {"start": 13.20, "end": 16.98, "easing": "ease_in", "from": {"x": 118, "y": -42, "scale": 1.072}, "to": {"x": 176, "y": -70, "scale": 1.095}},
+    {"start": 16.98, "end": 19.90, "easing": "ease_out", "from": {"x": 176, "y": -70, "scale": 1.095}, "to": {"x": 110, "y": -42, "scale": 1.080}},
+    {"start": 19.90, "end": 22.00, "easing": "sine", "from": {"x": 110, "y": -42, "scale": 1.080}, "to": {"x": 82, "y": -30, "scale": 1.065}}
+  ]
+}

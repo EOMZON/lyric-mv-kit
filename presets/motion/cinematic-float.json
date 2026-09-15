@@ -1,0 +1,10 @@
+{
+  "id": "cinematic-float",
+  "version": 1,
+  "label": "Cinematic Float / 电影缓推",
+  "recommended_style": "C_cinematic_letterbox",
+  "use_when": "已有强背景画面，歌词只需高级、克制、连续地存在",
+  "camera": {"pan_x_px": 12, "pan_y_px": 8, "progress_x_px": 26, "progress_y_px": -10, "cue_sway_px": 0, "zoom": 0.016, "period_seconds": 22},
+  "parallax": {"background": 0.28, "foreground": 0.62},
+  "audio_reactivity": {"bass_zoom": 0.003, "bass_push_y_px": 1, "treble_sway_x_px": 0}
+}

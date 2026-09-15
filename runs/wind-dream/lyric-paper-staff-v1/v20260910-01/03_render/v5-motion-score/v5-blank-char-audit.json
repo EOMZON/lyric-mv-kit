@@ -1,0 +1,21 @@
+{
+  "score": "v5-motion-score",
+  "window": [
+    29.5,
+    51.5
+  ],
+  "frames": 528,
+  "chars_measured": 5127,
+  "min_coverage": 0.147,
+  "median_coverage": 0.3333,
+  "blank_characters": [],
+  "lyric_ink_bounds": {
+    "min_x": 49,
+    "min_y": 198,
+    "max_x": 1182,
+    "max_y": 663
+  },
+  "safe_margin_px": 12,
+  "inside_safe_area": true,
+  "verdict": "PASS"
+}

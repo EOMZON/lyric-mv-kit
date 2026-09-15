@@ -1,0 +1,10 @@
+{
+  "id": "ambient-story",
+  "version": 1,
+  "label": "Ambient Story / 氛围叙事",
+  "recommended_style": "F_aurora_ribbon",
+  "use_when": "抒情、梦幻、风景或插画背景，靠视差和持续方向感推进",
+  "camera": {"pan_x_px": 18, "pan_y_px": 14, "progress_x_px": 38, "progress_y_px": -12, "cue_sway_px": 8, "zoom": 0.024, "period_seconds": 19},
+  "parallax": {"background": 0.22, "foreground": 0.82},
+  "audio_reactivity": {"bass_zoom": 0.004, "bass_push_y_px": 2, "treble_sway_x_px": 1}
+}
