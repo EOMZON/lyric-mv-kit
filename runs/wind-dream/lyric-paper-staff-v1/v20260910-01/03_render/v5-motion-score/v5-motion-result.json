@@ -1,0 +1,107 @@
+{
+  "design_brief": {
+    "job": "22-second macro-motion review",
+    "base": "v4 readable micro-motion",
+    "template": "type-camera",
+    "score": "motion-score.json"
+  },
+  "output": {
+    "path": "D:\\ZON\\codex\\lyric-mv-kit-motion-v5\\runs\\wind-dream\\lyric-paper-staff-v1\\v20260910-01\\03_render\\v5-motion-score\\wind-dream-v5-motion-score.mp4",
+    "sha256": "685998d37c4fa15c5b59d299f3f6bb77435e63f18d48956fc8e6dd1ef3ebf1f3",
+    "media": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 1280,
+          "height": 720,
+          "r_frame_rate": "24/1",
+          "nb_frames": "528"
+        },
+        {
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "r_frame_rate": "0/0",
+          "nb_frames": "1033"
+        }
+      ],
+      "format": {
+        "duration": "22.000000"
+      }
+    }
+  },
+  "checks": {
+    "decode": "pass",
+    "audit": {
+      "motion": {
+        "max_camera_dx_per_frame": 1.8572218834053444,
+        "max_camera_dy_per_frame": 0.7879123141719617,
+        "max_camera_scale_delta_per_frame": 0.0005013536621780723,
+        "x_range": [
+          -18.0,
+          175.33700258795787
+        ],
+        "y_range": [
+          -69.67993228384172,
+          8.0
+        ],
+        "scale_range": [
+          1.018,
+          1.0947952242446988
+        ]
+      },
+      "crossfade_seconds": 0.24,
+      "all_transitions_pass": true,
+      "transitions": [
+        {
+          "from": "朝我飞来",
+          "to": "当两束纸飞机在天空重叠",
+          "overlap_frames": 5,
+          "pass": true
+        },
+        {
+          "from": "当两束纸飞机在天空重叠",
+          "to": "跑道瞬间被云写成五线谱",
+          "overlap_frames": 4,
+          "pass": true
+        },
+        {
+          "from": "跑道瞬间被云写成五线谱",
+          "to": "你的笑像音符跳跃着",
+          "overlap_frames": 4,
+          "pass": true
+        },
+        {
+          "from": "你的笑像音符跳跃着",
+          "to": "我的心被旋律牵动着",
+          "overlap_frames": 5,
+          "pass": true
+        },
+        {
+          "from": "我的心被旋律牵动着",
+          "to": "奔向重逢那刻",
+          "overlap_frames": 5,
+          "pass": true
+        },
+        {
+          "from": "奔向重逢那刻",
+          "to": "我数着纸飞机的影子练马拉松配速",
+          "overlap_frames": 4,
+          "pass": true
+        },
+        {
+          "from": "我数着纸飞机的影子练马拉松配速",
+          "to": "每一步都是向你靠近的乐谱",
+          "overlap_frames": 4,
+          "pass": true
+        }
+      ]
+    }
+  },
+  "untested": [
+    "manual visual/listening review",
+    "full-song render"
+  ]
+}
