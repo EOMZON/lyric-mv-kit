@@ -1,0 +1,10 @@
+{
+  "id": "steady-karaoke",
+  "version": 1,
+  "label": "Steady Karaoke / 稳定跟唱",
+  "recommended_style": "C_cinematic_letterbox",
+  "use_when": "可读性和跟唱优先，适合大部分通用歌词视频",
+  "camera": {"pan_x_px": 2, "pan_y_px": 2, "progress_x_px": 0, "progress_y_px": 0, "cue_sway_px": 0, "zoom": 0.004, "period_seconds": 18},
+  "parallax": {"background": 0.10, "foreground": 0.18},
+  "audio_reactivity": {"bass_zoom": 0.002, "bass_push_y_px": 0, "treble_sway_x_px": 0}
+}

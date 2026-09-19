@@ -1,0 +1,10 @@
+{
+  "id": "type-camera",
+  "version": 1,
+  "label": "Typography Camera / 歌词镜头推进",
+  "recommended_style": "A_editorial_air",
+  "use_when": "歌词是第一视觉层，希望明显动态但不做逐字弹跳",
+  "camera": {"pan_x_px": 12, "pan_y_px": 9, "progress_x_px": 64, "progress_y_px": -20, "cue_sway_px": 18, "zoom": 0.035, "period_seconds": 14},
+  "parallax": {"background": 0.30, "foreground": 1.0},
+  "audio_reactivity": {"bass_zoom": 0.006, "bass_push_y_px": 3, "treble_sway_x_px": 1.5}
+}
