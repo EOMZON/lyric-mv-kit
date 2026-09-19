@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>lyric-mv-kit 跨仓协同状态 · 2026-09-19</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>document.addEventListener("DOMContentLoaded",()=>mermaid.initialize({startOnLoad:true,theme:"base",themeVariables:{fontSize:"14px"}}));</script>
+<style>
+  body{font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:#fafafa;color:#1f2328;max-width:1080px;margin:0 auto;padding:28px;line-height:1.6}
+  h1,h2,h3{color:#0b3d5c;border-bottom:1px solid #e1e4e8;padding-bottom:6px}
+  .meta{color:#57606a;font-size:13px}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{border:1px solid #d0d7de;padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:#eef2f5}
+  .p0{background:#ffebe9}.p1{background:#fff8c5}.p2{background:#eef7ff}
+  code{background:#f0f3f6;padding:1px 5px;border-radius:4px;font-size:13px}
+  .note{background:#fffbe6;border-left:4px solid #d4a72c;padding:10px 14px;margin:14px 0}
+  .ok{color:#1a7f37;font-weight:600}.no{color:#cf222e;font-weight:600}
+  a{color:#0969da}
+</style>
+</head>
+<body>
+<h1>lyric-mv-kit × 跨仓协同状态总览</h1>
+<p class="meta">更新：2026-09-19 · 关联 Issue：<a href="https://github.com/EOMZON/lyric-mv-kit/issues/3">lyric-mv-kit #3 (P0 仓库边界)</a> · 治理：<a href="https://github.com/EOMZON/codex-skills-private/blob/9a8e385ccc98f068b0990133f9a2e80681ffa9ec/github-ops/references/test-main-governance.md">test-main-governance</a> · 跨仓协调：<a href="https://github.com/EOMZON/v0-project-intelligence-hub">Product Hub (v0-project-intelligence-hub)</a></p>
+
+<h2>0. 本对话主线目标</h2>
+<p>拉取最新 → 定位最重要问题（Issue #3 仓库边界/P0）→ 推进。本对话<strong>只专注 lyric-mv-kit 边界</strong>；专辑目录、历史视频+R2 为「额外关注」维度，已拆为可并行对话 B / C（见 §7）。</p>
+
+<h2>1. 时间线（关键节点）</h2>
+<table>
+<tr><th>日期</th><th>事件</th><th>仓库/Issue</th></tr>
+<tr><td>09-15</td><td>PR #2 创建（reusable + song-specific 混带）；Issue #1 结构分析</td><td>lyric-mv-kit</td></tr>
+<tr><td>09-17</td><td>Issue #1 迁移 workbench-private 并关 NOT_PLANNED；PRODUCT-SCOPE 候选 + <code>docs/open-source-boundary-20260917</code> 分支；workbench 远端迁移完成</td><td>lyric-mv-kit / workbench</td></tr>
+<tr><td>09-18</td><td>music-board / music-pipeline 暴露 catalog 对账 bug（track_count 50 vs 49）；music.zondev.top O1 Spotify baseline、《仍然》上传</td><td>music-board / music-pipeline</td></tr>
+<tr><td>09-19</td><td>本分析：拉最新（新增 <code>test</code> + <code>docs/open-source-boundary-20260917</code>）；建两份 reconciliation 文档 + 干净 reusable 分支并推送；建 music-board #82；建 Product Hub 跨仓 issue</td><td>多仓</td></tr>
+</table>
+
+<h2>2. 架构图（as-is → to-be）</h2>
+<div class="note">下图在 GitHub / 本预览自动渲染（mermaid）。</div>
+
+<h3>2.1 当前 as-is（边界仍混、catalog 不全）</h3>
+<pre class="mermaid">
+graph TD
+    A[lyric-mv-kit 公开仓] -->|混带 song-specific| B[runs/wind-dream/** + handoff]
+    A -->|reusable 已拆出| C[codex/motion-reusable-from-test]
+    D[lyric-mv-workbench-private] -.未接收.-> B
+    E[music-board / music.zondev.top] -->|catalog 不全| F[专辑 4FD9751A 缺曲目/平台]
+    G[music-pipeline-windows-private] -->|上传回执| E
+    G -->|50vs49 未对账 bug| H[(album_registry)]
+    I[DistroKid/网易云] -->|权威发行源 未回拉| E
+    J[creationos-os] -->|只读投影| E
+    K[visual-exploration-workbench] -->|R2 先例| L[(Cloudflare R2)]
+</pre>
+
+<h3>2.2 理想 to-be（原始诉求）</h3>
+<pre class="mermaid">
+graph TD
+    A[lyric-mv-kit 公开仓] -->|只留| R[reusable 模板+renderer+contract]
+    D[lyric-mv-workbench-private] -->|接收| S[单曲 run/QA/audit/handoff]
+    M[music-board 真相源] -->|完整 catalog| F2[每发行=可播放回链+durable receipt]
+    M -->|Template Gallery| A
+    G2[music-pipeline] -->|幂等上传+对账| M
+    I2[DistroKid/各平台] -->|发行导出| G2
+    L2[(Cloudflare R2)] -->|历史发布镜像| M
+    J2[creationos-os] -->|只读投影| M
+</pre>
+
+<h2>3. 理想 vs 现状差距</h2>
+<table>
+<tr><th>目标（原始诉求）</th><th>理想态</th><th>状态</th><th>缺口</th></tr>
+<tr><td>lyric-mv-kit 干净开源模板</td><td>只留 reusable</td><td class="ok">分析+分支✅ / 迁移❌</td><td>物理迁出 song-specific(23)+doc(10)</td></tr>
+<tr><td>music.zondev.top 完整真实 catalog</td><td>每发行可播放回链</td><td class="no">部分（本专辑不全）</td><td><a href="https://github.com/EOMZON/music-board/issues/82">music-board #82</a> 对账</td></tr>
+<tr><td>Template Gallery 回链 lyric-mv-kit</td><td>橱窗展示已审模板</td><td class="no">未做</td><td>music-board #27</td></tr>
+<tr><td>发布回执持久+计数对账</td><td>albumId/trackId/receipt</td><td class="no">部分（50vs49 bug）</td><td><a href="https://github.com/EOMZON/music-pipeline-windows-private/issues/13">music-pipeline #13</a>/#12</td></tr>
+<tr><td>历史发布可检索+R2 镜像</td><td>视频可回链持久托管</td><td class="no">未开始</td><td>需 URL + 新建 R2 issue</td></tr>
+<tr><td>听众能力真相（不伪装可播放）</td><td>只展真实可播</td><td class="no">未做</td><td>music-board #57</td></tr>
+<tr><td>README template-first</td><td>以模板为产品叙事首屏</td><td class="no">未做</td><td>lyric-mv-kit #3 P1</td></tr>
+</table>
+
+<h2>4. 执行清单（优先级 + 时间节点 + 关联 Issue）</h2>
+<table>
+<tr><th>优先级</th><th>项</th><th>仓库/Issue</th><th>时间节点</th></tr>
+<tr class="p0"><td>P0①</td><td>PR #2 物理拆分：迁 23 song-specific 文件 + wind-dream bg → workbench-private</td><td>lyric-mv-kit #3 / workbench</td><td>确认落点后 1–2 天</td></tr>
+<tr class="p0"><td>P0②</td><td>旧 PR #2 维持 HOLD，从 <code>codex/motion-reusable-from-test</code> 开干净 reusable PR → <code>test</code></td><td>lyric-mv-kit #3</td><td>P0① 后</td></tr>
+<tr class="p0"><td>P0③</td><td>music-board #82 专辑对账：拉 DistroKid 导出补曲目/平台</td><td>music-board #82</td><td>用户提供导出后</td></tr>
+<tr class="p0"><td>P0④</td><td>music-pipeline #13/#12 track_count 对账（50vs49）</td><td>music-pipeline #13/#12</td><td>与 #82 同批</td></tr>
+<tr class="p1"><td>P1①</td><td>P0-3 物理迁 10 协作 doc（7→music-board / 3→skills）</td><td>lyric-mv-kit #3</td><td>P0① 后</td></tr>
+<tr class="p1"><td>P1②</td><td>Template Gallery 回链 lyric-mv-kit</td><td>music-board #27</td><td>目录对账后</td></tr>
+<tr class="p1"><td>P1③</td><td>能力真相（不伪装可播放）</td><td>music-board #57</td><td>目录对账后</td></tr>
+<tr class="p1"><td>P1④</td><td>历史发布视频检索 + 新建 music R2 issue + 镜像</td><td>music-board + R2</td><td>用户提供 URL 后</td></tr>
+<tr class="p1"><td>P1⑤</td><td>专辑/播放语义与信息架构</td><td>music-board #20/#59</td><td>目录对账后</td></tr>
+<tr class="p2"><td>P2①</td><td>README template-first</td><td>lyric-mv-kit #3 P1</td><td>边界收口后</td></tr>
+<tr class="p2"><td>P2②</td><td>Product Hub 治理基建</td><td>v0-project-intelligence-hub</td><td>与音乐目标无关，不在本批</td></tr>
+</table>
+
+<h2>5. Git 治理（合规）</h2>
+<ul>
+<li>拓扑：<code>main</code>(稳定公开) ← <code>test</code>(集成候选) ← 短生命周期 task branch。本分析不授权合 main。</li>
+<li>PR #2 维持 Draft/HOLD；不得原样合入。</li>
+<li>语义 reconcile 不得用「文件名差不多」替代（需过 <a href="https://github.com/EOMZON/codex-skills-private/issues/29">codex-skills-private #29 Merge Reconciliation Gate</a>）。</li>
+<li>歌曲特有证据只从 PR #2 分支迁 workbench，不在 main 删除历史（main 从未合入这些文件）。</li>
+</ul>
+
+<h2>6. 本地 worktree 治理建议</h2>
+<div class="note">问题：用一个 worktree 治理 skill 管理本地分支，合并导致部分内容未同步。</div>
+<ul>
+<li><strong>每 task 分支独立 worktree</strong>：<code>git worktree add ../wt-&lt;branch&gt; &lt;branch&gt;</code>，不要在多 task 分支间切换同一个受管 worktree。</li>
+<li><strong>合并前同步校验</strong>：merge/rebase 进 <code>test</code>/<code>main</code> 前先 <code>git fetch --all --prune</code> 并验证 <code>git diff &lt;base&gt;...HEAD</code> 的 tree 相等；未跟踪的 song-specific 产物（<code>runs/</code>、<code>samples/</code>）不得留在共享 worktree。</li>
+<li><strong>pre-merge 闸门</strong>：工作树存在 allowlist 外的未跟踪文件时合并失败，避免漏同步/静默覆盖（本次分析即因本地 2 处 wind-dream 修改需 stash 才切分支）。</li>
+<li><strong>受管 worktree 仅承载单一 task</strong>；跨 task 内容用 workbench-private 远端回拉，而非本地拷贝。</li>
+</ul>
+
+<h2>7. 并行拆分（解耦、可并行、无冲突）</h2>
+<table>
+<tr><th>对话</th><th>范围</th><th>仓库</th><th>冲突</th></tr>
+<tr><td><strong>A（本对话，保留）</strong></td><td>lyric-mv-kit 边界：P0①②、P1①</td><td>lyric-mv-kit</td><td>—</td></tr>
+<tr><td><strong>B（云端并行）</strong></td><td>音乐 catalog/专辑对账 + Template Gallery + 能力真相：P0③④、P1②③⑤</td><td>music-board + music-pipeline</td><td>无（不同仓 git）</td></tr>
+<tr><td><strong>C（云端并行）</strong></td><td>历史发布视频检索 + R2 镜像：P1④</td><td>外部平台 + R2</td><td>无（外部/跨仓）</td></tr>
+</table>
+<p class="meta">B/C 均只动各自 issue（#82 vs 新 R2 issue），不冲突。优先用云端对话执行。</p>
+
+<h2>8. 已落地的交付物</h2>
+<ul>
+<li>lyric-mv-kit <code>codex/p0-boundary-reconcile</code>：<a href="https://github.com/EOMZON/lyric-mv-kit/blob/codex/p0-boundary-reconcile/docs/open-source-boundary-20260917/DELIVERY-MANIFEST.pr2.md">DELIVERY-MANIFEST.pr2.md</a>、<a href="https://github.com/EOMZON/lyric-mv-kit/blob/codex/p0-boundary-reconcile/docs/open-source-boundary-20260917/DOC-AUDIT.collab-docs.md">DOC-AUDIT.collab-docs.md</a>、本文件</li>
+<li>lyric-mv-kit <code>codex/motion-reusable-from-test</code>：干净 reusable 集（12 文件，song-free）</li>
+<li><a href="https://github.com/EOMZON/music-board/issues/82">music-board #82</a>：专辑对账</li>
+<li>v0-project-intelligence-hub（Product Hub）：跨仓协调 issue（见仓库）</li>
+<li>lyric-mv-workbench-private：inbound 迁移 issue（见仓库）</li>
+</ul>
+</body>
+</html>
