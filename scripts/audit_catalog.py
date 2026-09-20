@@ -30,12 +30,13 @@ Usage
 from __future__ import annotations
 
 import argparse
+import difflib
 import json
 import os
 import sys
 from collections import Counter
 from pathlib import Path, PureWindowsPath
-from typing import Any, Iterable, Sequence
+from typing import Any, Iterable, Mapping, Sequence
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -51,7 +52,71 @@ AUDIO_SUFFIXES = (".flac", ".wav", ".mp3", ".m4a", ".aiff", ".aif", ".ogg")
 
 
 def load_records(path: Path) -> list[dict[str, Any]]:
+    """Load either raw ``catalog.json`` or a coverage-ledger export.
+
+    The coverage ledger (the data behind an owner-operated coverage board) is
+    the *stronger* source: it has already resolved identity by ISRC and exposes
+    explicit per-channel booleans plus lyrics/master/cover status, so prefer it
+    whenever it is available.
+    """
     data = json.loads(path.read_text(encoding="utf-8"))
+    if isinstance(data, dict) and isinstance(data.get("rows"), list):
+        return [coverage_row_to_record(r) for r in data["rows"] if isinstance(r, dict)]
+    return _raw_records(data)
+
+
+#: coverage-ledger boolean -> channel key
+_COVERAGE_FLAGS = {
+    "hasSpotify": "spotify",
+    "hasApple": "apple",
+    "hasYoutube": "youtube",
+    "hasYoutubeMusic": "youtubemusic",
+    "hasNetease": "netease",
+}
+
+_URL_FIELDS = {
+    "spotify": "spotifyUrl",
+    "apple": "appleUrl",
+    "youtube": "youtubeMusicUrl",
+    "youtubemusic": "youtubeMusicUrl",
+    "netease": "neteaseUrl",
+}
+
+
+def coverage_row_to_record(row: Mapping[str, Any]) -> dict[str, Any]:
+    """Project a coverage-ledger row into the same shape as a catalog record.
+
+    Only the fields the gate understands are projected, so the rest of the
+    module keeps working unchanged and never learns about ledger internals.
+    Note that the ledger carries **flags, not lyric bodies**; pass
+    ``--lyrics-source`` when you need content-based identity checks.
+    """
+    links: list[dict[str, str]] = []
+    for flag, key in _COVERAGE_FLAGS.items():
+        if not row.get(flag):
+            continue
+        url_field = _URL_FIELDS[key]
+        url = str(row.get(url_field) or "")
+        if not url and key == "netease" and row.get("neteaseStatus") == "verified_local_record":
+            url = str(row.get("neteaseUrl") or "")
+        if not url:
+            # The ledger asserts presence through a *verified* flag, not through
+            # a URL string; keep that evidence instead of dropping the channel.
+            url = f"verified-presence:{key}"
+        links.append({"platform": key, "url": url})
+    meta = {k: row.get(k) for k in ("score", "ready", "identityBasis", "coverageClass",
+                                    "lyricsStatus", "masterStatus", "blockers") if k in row}
+    return {
+        "id": row.get("recordId"),
+        "title": row.get("title"),
+        "artist": row.get("artist"),
+        "type": "song",
+        "links": links,
+        "meta": meta,
+    }
+
+
+def _raw_records(data: Any) -> list[dict[str, Any]]:
     if isinstance(data, dict):
         for key in ("items", "records", "songs", "tracks"):
             if isinstance(data.get(key), list):
@@ -60,7 +125,7 @@ def load_records(path: Path) -> list[dict[str, Any]]:
         return [v for v in data.values() if isinstance(v, dict) and "links" in v]
     if isinstance(data, list):
         return [r for r in data if isinstance(r, dict)]
-    raise SystemExit(f"unsupported catalog shape in {path}")
+    raise SystemExit("unsupported catalog shape")
 
 
 def local_master_titles(root: Path) -> dict[str, set[str]]:
@@ -79,6 +144,108 @@ def _best_platforms(records: Sequence[dict[str, Any]]) -> set[str]:
     if not records:
         return set()
     return max((real_platforms(r) for r in records), key=len)
+
+
+def attach_lyrics(records: Sequence[dict[str, Any]], source: Path) -> None:
+    """Fill in lyric bodies from a raw catalog, keyed by record id."""
+    by_id = {str(r.get("id")): r.get("lyrics") for r in _raw_records(
+        json.loads(source.read_text(encoding="utf-8")))}
+    for record in records:
+        if not record.get("lyrics") and str(record.get("id")) in by_id:
+            record["lyrics"] = by_id[str(record.get("id"))]
+
+
+def content_clusters(records: Sequence[dict[str, Any]],
+                     threshold: float = 0.6) -> list[list[dict[str, Any]]]:
+    """Split same-title records whose *lyrics* disagree into separate works.
+
+    Same title + same artist is not enough: `Neon Snow` exists twice with
+    completely different lyric bodies (similarity 0.02) — two different songs
+    sharing a name. Unioning their channels would fabricate a 5-channel work
+    exactly as the 2026-09-20 incident did. `Cha-Cha Groove`, `Cha-Cha Heat`
+    and `Tropical Beat` score 0.99-1.00 and therefore do merge.
+    """
+    clusters: list[list[dict[str, Any]]] = []
+    for record in records:
+        lyrics = _normalise_lyrics(record.get("lyrics"))
+        title = str(record.get("title") or "").strip().casefold()
+        placed = False
+        for cluster in clusters:
+            head = cluster[0]
+            if str(head.get("title") or "").strip().casefold() != title:
+                continue
+            head_lyrics = _normalise_lyrics(head.get("lyrics"))
+            if lyrics and head_lyrics:
+                ratio = difflib.SequenceMatcher(None, head_lyrics, lyrics).ratio()
+                if ratio >= threshold:
+                    cluster.append(record)
+                    placed = True
+                    break
+            elif not lyrics and not head_lyrics:
+                cluster.append(record)
+                placed = True
+                break
+        if not placed:
+            clusters.append([record])
+    return clusters
+
+
+def _normalise_lyrics(value: Any) -> str:
+    if not isinstance(value, str):
+        return ""
+    text = value.replace("作词", " ").replace("作曲", " ").replace("编曲", " ")
+    return " ".join(text.split()).lower()
+
+
+def merge_identity_records(records: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Collapse same-title records into one *work*.
+
+    Two conditions must hold before records are unioned:
+
+    1. the owner has ruled that the colliding artist names denote the same
+       identity (e.g. 音右 = ROYAZON EOM) — hence ``--identity-policy`` must be
+       asked for explicitly rather than defaulted;
+    2. their **lyrics agree** (see :func:`content_clusters`), because identity
+       merges lean on artist aliases that say nothing about whether two titles
+       are really the same song.
+    """
+    clusters = content_clusters(records)
+    out: list[dict[str, Any]] = []
+    title_counts: Counter[str] = Counter(
+        str(r.get("title") or "").strip().casefold() for r in records
+    )
+    for cluster in clusters:
+        group = cluster
+        key = str(group[0].get("title") or "").strip().casefold()
+        links: dict[str, str] = {}
+        for record in group:
+            for link in record.get("links") or []:
+                if not isinstance(link, Mapping):
+                    continue
+                platform = link.get("platform")
+                url = (link.get("url") or "").strip()
+                if platform and url and platform not in links:
+                    links[platform] = url
+        artists = sorted({str(r.get("artist") or "?") for r in group})
+        same_title_elsewhere = title_counts.get(key, 0) > len(group)
+        basis = ("owner-adjudicated same identity + matching lyrics"
+                 if len(artists) > 1 else "single record")
+        out.append(
+            {
+                "id": "work:" + key,
+                "title": group[0].get("title"),
+                "artist": " / ".join(artists),
+                "type": "song",
+                "links": [{"platform": p, "url": u} for p, u in links.items()],
+                "meta": {
+                    "merged_records": len(group),
+                    "identityBasis": basis,
+                    "same_title_splits": same_title_elsewhere,
+                    "lyrics": _normalise_lyrics(group[0].get("lyrics"))[:2000],
+                },
+            }
+        )
+    return out
 
 
 def index_by_title(records: Iterable[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
@@ -179,14 +346,25 @@ def main(argv: Sequence[str] | None = None) -> int:
     ap.add_argument("--merge-duplicates", action="store_true",
                     help="union channels across same-title records (LOW identity "
                          "confidence; for lead generation, never for the gate)")
+    ap.add_argument("--identity-policy", choices=("strict", "merged"), default="strict",
+                    help="merged = the owner has ruled colliding artist names are the "
+                         "same identity, so same-title records may be unioned (default: strict)")
     ap.add_argument("--limit", type=int, default=25, help="rows to print")
     ap.add_argument("--json", type=Path, default=None, help="also write JSON report")
+    ap.add_argument("--lyrics-source", type=Path, default=None,
+                    help="catalog.json supplying lyric bodies for content-based "
+                         "identity checks (the coverage ledger has flags only)")
     args = ap.parse_args(argv)
 
     if not args.catalog.exists():
         raise SystemExit(f"catalog not found: {args.catalog}")
 
     records = load_records(args.catalog)
+    if args.lyrics_source:
+        attach_lyrics(records, args.lyrics_source)
+    if args.identity_policy == "merged" or args.merge_duplicates:
+        records = merge_identity_records(records)
+        print(f"[identity-policy] {'owner-adjudicated merge' if args.identity_policy == 'merged' else 'lead-generation merge (low confidence)'} -> {len(records)} works")
     masters = local_master_titles(args.local_master) if args.local_master else None
     report = build_report(
         records,

@@ -143,6 +143,27 @@ python scripts/audit_catalog.py  catalog.json --local-master ../album --merge-du
 
 `--merge-duplicates` 仅用于找线索，会把每行标为 `identity_confidence: low`，**绝不能当闸门用**。
 
+### 两个数据源，优先用覆盖台账
+
+```bash
+# 首选：覆盖台账（/coverage 的数据源）——身份已按 ISRC 归并，渠道以「已核验标志」给出，
+# 另含歌词/母带/封面状态；歌词正文用 catalog 补齐
+python scripts/audit_catalog.py ../music-board/coverage/coverage-ledger-data.json \
+    --lyrics-source ../music-board/catalog.json --identity-policy merged
+
+# 退而求其次：裸 catalog.json —— 能用，但三个陷阱都会继承
+python scripts/audit_catalog.py ../music-board/catalog.json --min-channels 3
+```
+
+### 同一身份还不够，歌词必须也对得上
+
+合并两条记录必须**同时**满足：
+
+1. Owner 已裁定相撞的艺人名是同一身份（`--identity-policy merged`，**绝不是默认值**）；
+2. 歌词正文一致（`content_clusters()`，相似度阈值约 0.6）。
+
+2026-09-20 真实例证：Owner 裁定「音右 = ROYAZON EOM」后，四支标题被提升到 5 端——但 `Neon Snow` 两条记录的歌词相似度只有 **0.02**，是两首同名歌，因此保持为两个独立作品；`Cha-Cha Groove`（0.99）、`Cha-Cha Heat`（0.99）、`Tropical Beat`（1.00）才是真的同一首，可以合并。
+
 ---
 
 ## 工作原理

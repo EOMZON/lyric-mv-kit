@@ -147,6 +147,11 @@ the catalog owner has not adjudicated (`identityBasis: same_title_collision;
 not merged`), so per-record judgments stay per-record and
 `duplicate_titles()` only *reports* collisions for review.
 
+Even so, an owner ruling may legitimately merge them — see *Two sources, one
+order of preference* below, and note that merging additionally requires the
+lyric bodies to agree: `Neon Snow` has two records whose lyrics are unrelated,
+so it is two songs that merely share a name.
+
 ### Harness
 
 ```bash
@@ -159,6 +164,32 @@ python scripts/audit_catalog.py  catalog.json --local-master ../album --merge-du
 
 `--merge-duplicates` exists for lead generation only; it marks every row
 `identity_confidence: low` and must never be used as the gate.
+
+### Two sources, one order of preference
+
+```bash
+# preferred: the coverage ledger — identity already resolved by ISRC, with
+# verified per-channel flags (no URLs needed) plus lyrics/master/cover status
+python scripts/audit_catalog.py ../music-board/coverage/coverage-ledger-data.json \
+    --lyrics-source ../music-board/catalog.json --identity-policy merged
+
+# fallback: raw catalog.json — workable, but you inherit all three traps
+python scripts/audit_catalog.py ../music-board/catalog.json --min-channels 3
+```
+
+### Same identity is not enough — the lyrics must agree too
+
+Merging two records is only legitimate when **both** hold:
+
+1. the owner has ruled the colliding artist names are the same identity
+   (`--identity-policy merged`, never the default);
+2. their lyric bodies agree (`content_clusters()`, ~0.6 similarity).
+
+Real example, 2026-09-20: an owner ruling merged 音右 with ROYAZON EOM, which
+promoted four titles to five channels — but `Neon Snow` scores **0.02** lyric
+similarity between its two records, i.e. two different songs sharing a name, so
+it stays two works. `Cha-Cha Groove` (0.99), `Cha-Cha Heat` (0.99) and
+`Tropical Beat` (1.00) are genuine and do merge.
 
 ---
 
