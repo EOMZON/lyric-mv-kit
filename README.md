@@ -107,6 +107,61 @@ positional arguments:
 
 ---
 
+## Selection gate: verified distribution facts
+
+Before you commit to a song for production, put its catalog record through the
+gate. `lyric_mv.dataset` answers exactly one question — *how many distribution
+channels are verifiably linked* — and is deliberately not named after business
+intent so it cannot be quietly overloaded later.
+
+```python
+from lyric_mv.dataset import real_platforms, is_multi_channel, select_real_distributed
+
+real_platforms(record)                       # {'spotify', 'apple', 'youtube', ...}
+is_multi_channel(record, min_n=3)            # bool
+is_multi_channel(record, 3, require=("netease",))
+rows = select_real_distributed(records, min_n=3)   # richest first, ready to paste into an issue
+```
+
+A channel counts only when **all** of the following hold:
+
+| Rule | Why |
+|---|---|
+| `url.strip()` must be non-empty | A `platform` key with an empty URL is a **distribution placeholder** (submitted to DistroKid, links not back-filled), not a release. 131 of 1307 catalog records have *every* link empty. |
+| `platform` must be a distribution channel | `official` (label site), `github` (repo) and `royazon` (artist page) carry real URLs but are **context links**. Counting them turns a 2-channel record into a fake 5-channel one. |
+| structure must be well-formed | Missing `links`, `None` entries and absent keys degrade to "no channels" instead of raising. |
+
+> **Never judge "released on many platforms" by whether `platform` keys exist.**
+> That single assumption selected an unreleased track for production once and
+> cost effort across three repositories before it was caught.
+
+This module *consumes* the channel-status semantics owned upstream
+(`music-board#74`: `VERIFIED / PRESENT_UNVERIFIED / MISSING / …`); it does not
+redefine them and never mutates catalog data.
+
+### Same-title duplicates are surfaced, never merged
+
+`先把自己哄好` exists both as 音右 (netease + spotify) and as ROYAZON EOM
+(spotify + youtube + youtubemusic). Unioning them fabricates a 4-channel "work"
+the catalog owner has not adjudicated (`identityBasis: same_title_collision;
+not merged`), so per-record judgments stay per-record and
+`duplicate_titles()` only *reports* collisions for review.
+
+### Harness
+
+```bash
+python scripts/audit_catalog.py ../music-board/catalog.json --min-channels 3
+python scripts/audit_catalog.py  catalog.json --min-channels 3 --require netease
+# which songs can I actually render today? intersect with local masters
+python scripts/audit_catalog.py  catalog.json --local-master ../music-pipeline/album
+python scripts/audit_catalog.py  catalog.json --local-master ../album --merge-duplicates
+```
+
+`--merge-duplicates` exists for lead generation only; it marks every row
+`identity_confidence: low` and must never be used as the gate.
+
+---
+
 ## How it works
 
 ```
