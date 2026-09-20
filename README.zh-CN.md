@@ -102,6 +102,70 @@ positional arguments:
 
 ---
 
+## 选曲闸门：已核验的分发事实
+
+在为一首歌立项之前，先把它的目录记录过一遍闸门。`lyric_mv.dataset` 只回答一个问题——**有多少个可核验的分发渠道**，因此刻意不用「是否已发行/是否可推广」这类业务词命名，避免日后被悄悄扩展含义。
+
+```python
+from lyric_mv.dataset import real_platforms, is_multi_channel, select_real_distributed
+
+real_platforms(record)                       # {'spotify', 'apple', 'youtube', ...}
+is_multi_channel(record, min_n=3)            # bool
+is_multi_channel(record, 3, require=("netease",))
+rows = select_real_distributed(records, min_n=3)   # 渠道多者优先，可直接贴进 issue
+```
+
+一条渠道被计入，必须**同时**满足：
+
+| 规则 | 原因 |
+|---|---|
+| `url.strip()` 非空 | 只有 platform 键、URL 为空的是**分发占位**（已提交 DistroKid、链接未回填），不是已发行。1307 条记录中有 131 条链接全空。 |
+| `platform` 必须是分发渠道 | `official`（官网）、`github`（仓库）、`royazon`（艺人主页）URL 都真实，但它们是**上下文链接**；计入后会把 2 渠道记录伪造成 5 渠道。 |
+| 结构合法 | 缺失 `links`、`None` 成员、缺键都退化为「无渠道」，不抛异常。 |
+
+> **绝不要用「platform 键是否存在」判断多端分发。** 这个假设曾让一首未发行的歌进入制作流程，造成跨三仓返工。
+
+本模块**消费**上游 `music-board#74` 定义的渠道状态语义（`VERIFIED / PRESENT_UNVERIFIED / MISSING / …`），不重新定义，也从不修改台账数据。
+
+### 同名重复记录只提示、不合并
+
+`《先把自己哄好》`同时存在「音右」(网易云+Spotify) 与「ROYAZON EOM」(Spotify+YouTube+YouTube Music) 两条记录。把它们取并集会凭空造出一个未经裁定的 4 渠道「作品」（上游标注 `identityBasis: same_title_collision; not merged`），所以逐条判定保持逐条，`duplicate_titles()` 只负责把碰撞**报出来**供人工裁定。
+
+### 审计脚本
+
+```bash
+python scripts/audit_catalog.py ../music-board/catalog.json --min-channels 3
+python scripts/audit_catalog.py  catalog.json --min-channels 3 --require netease
+# 今天到底能渲染哪首？与本地母带求交集
+python scripts/audit_catalog.py  catalog.json --local-master ../music-pipeline/album
+python scripts/audit_catalog.py  catalog.json --local-master ../album --merge-duplicates
+```
+
+`--merge-duplicates` 仅用于找线索，会把每行标为 `identity_confidence: low`，**绝不能当闸门用**。
+
+### 两个数据源，优先用覆盖台账
+
+```bash
+# 首选：覆盖台账（/coverage 的数据源）——身份已按 ISRC 归并，渠道以「已核验标志」给出，
+# 另含歌词/母带/封面状态；歌词正文用 catalog 补齐
+python scripts/audit_catalog.py ../music-board/coverage/coverage-ledger-data.json \
+    --lyrics-source ../music-board/catalog.json --identity-policy merged
+
+# 退而求其次：裸 catalog.json —— 能用，但三个陷阱都会继承
+python scripts/audit_catalog.py ../music-board/catalog.json --min-channels 3
+```
+
+### 同一身份还不够，歌词必须也对得上
+
+合并两条记录必须**同时**满足：
+
+1. Owner 已裁定相撞的艺人名是同一身份（`--identity-policy merged`，**绝不是默认值**）；
+2. 歌词正文一致（`content_clusters()`，相似度阈值约 0.6）。
+
+2026-09-20 真实例证：Owner 裁定「音右 = ROYAZON EOM」后，四支标题被提升到 5 端——但 `Neon Snow` 两条记录的歌词相似度只有 **0.02**，是两首同名歌，因此保持为两个独立作品；`Cha-Cha Groove`（0.99）、`Cha-Cha Heat`（0.99）、`Tropical Beat`（1.00）才是真的同一首，可以合并。
+
+---
+
 ## 工作原理
 
 ```
