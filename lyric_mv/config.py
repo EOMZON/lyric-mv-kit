@@ -63,6 +63,10 @@ _SANS_CANDIDATES: Sequence[str] = (
 )
 
 _LATIN_CANDIDATES: Sequence[str] = (
+    # OFL, redistributed in assets/fonts/ — preferred: geometric display sans
+    # that matches the F_aurora_ribbon design language (fixes the flat look
+    # of pure OS fallbacks; see issue #6 discussion).
+    "SpaceGrotesk-Bold.ttf",
     "Dengb.ttf",           # Windows (DengXian Bold)
     "DejaVuSans-Bold.ttf",
     "Helvetica.ttc",       # macOS
