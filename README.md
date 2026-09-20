@@ -169,7 +169,11 @@ python scripts/audit_catalog.py  catalog.json --local-master ../album --merge-du
 
 ```bash
 # preferred: the coverage ledger — identity already resolved by ISRC, with
-# verified per-channel flags (no URLs needed) plus lyrics/master/cover status
+# verified per-channel flags plus real URLs where present. NOTE: a flag without
+# a URL (e.g. hasSpotify:true but empty spotifyUrl) is recorded as reach
+# potential in meta.flag_only_channels but is NOT a verified channel — the
+# ledger twin of the DistroKid placeholder trap. Always pass --lyrics-source
+# so same-title records are merged only when their lyric bodies agree.
 python scripts/audit_catalog.py ../music-board/coverage/coverage-ledger-data.json \
     --lyrics-source ../music-board/catalog.json --identity-policy merged
 
@@ -185,11 +189,17 @@ Merging two records is only legitimate when **both** hold:
    (`--identity-policy merged`, never the default);
 2. their lyric bodies agree (`content_clusters()`, ~0.6 similarity).
 
-Real example, 2026-09-20: an owner ruling merged 音右 with ROYAZON EOM, which
-promoted four titles to five channels — but `Neon Snow` scores **0.02** lyric
-similarity between its two records, i.e. two different songs sharing a name, so
-it stays two works. `Cha-Cha Groove` (0.99), `Cha-Cha Heat` (0.99) and
-`Tropical Beat` (1.00) are genuine and do merge.
+Real example, 2026-09-20: an owner ruling merged 音右 with ROYAZON EOM. Run
+through the **URL-gated** selection, the three dance titles `Cha-Cha Groove`,
+`Cha-Cha Heat` and `Tropical Beat` each become a genuine **4-channel** work —
+`apple` + `youtube` + `youtubemusic` from the ISRC record and `netease` from the
+音右 record, with lyric similarity 0.99–1.00. `Neon Snow` scores **0.02** between
+its two records (two different songs sharing a name, flagged `not merged` in the
+ledger) and is excluded. No song in the catalog reaches 5 *verified* channels:
+the only channel missing from those works, `spotify`, is a **flag-only** entry
+(present in the ledger, no URL), so it is correctly kept out of the gate. The
+production target was `Cha-Cha Groove` — it ties for the most verified channels
+(4) and its audio + lyrics were already on hand.
 
 ---
 

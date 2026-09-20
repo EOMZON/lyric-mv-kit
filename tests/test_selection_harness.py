@@ -95,22 +95,22 @@ REAL_PAIR_B = {
 # --------------------------------------------------------------------------
 
 
-def test_coverage_row_projects_verified_channels():
+def test_coverage_row_projects_only_url_backed_channels():
     from lyric_mv.dataset import real_platforms
 
     record = audit.coverage_row_to_record(COVERAGE_ROW)
-    assert real_platforms(record) == {
-        "spotify", "apple", "youtube", "youtubemusic",
-    }
+    # spotify is flagged but has no URL -> it is NOT a verified channel
+    assert real_platforms(record) == {"apple", "youtube", "youtubemusic"}
 
 
-def test_coverage_projection_never_loses_a_channel_to_a_missing_url():
+def test_coverage_flag_only_channel_excluded_from_gate_but_kept_as_evidence():
     record = audit.coverage_row_to_record(COVERAGE_ROW)
-    urls = {link["platform"]: link["url"] for link in record["links"]}
-    # the ledger asserts presence through verified flags, so channels stay even
-    # when the board has not recorded a URL string
-    assert urls["spotify"].startswith("verified-presence:")
-    assert urls["apple"].startswith("https://")
+    platforms = {link["platform"] for link in record["links"]}
+    # the gate must not count a flag-without-URL as a real channel (the ledger
+    # twin of the DistroKid placeholder trap); the evidence is preserved though
+    assert "spotify" not in platforms
+    assert record["meta"]["flag_only_channels"] == ["spotify"]
+    assert any(l["url"].startswith("https://") for l in record["links"])
 
 
 def test_load_records_detects_coverage_shape(tmp_path):
@@ -149,6 +149,21 @@ def test_merge_never_invents_the_neon_snow_five_channel_work():
     merged = audit.merge_identity_records([CATALOG_RECORD, SAME_SONG_OTHER_PLATFORM])
     channels = set().union(*(real_platforms(r) for r in merged))
     assert channels == {"netease"}, "Neon Snow is not a 5-channel work"
+
+
+def test_neon_snow_excluded_from_four_channel_gate():
+    from lyric_mv.dataset import real_platforms
+
+    # ISRC record (flag-only spotify, real apple/youtube/youtubemusic) carries
+    # the same dissociated lyrics as SAME_SONG_OTHER_PLATFORM; the 音右 record
+    # carries different lyrics. They disagree (0.02) so content_clusters keeps
+    # them as two works, neither of which reaches 4 verified channels.
+    isrc_record = audit.coverage_row_to_record(COVERAGE_ROW)
+    isrc_record["lyrics"] = SAME_SONG_OTHER_PLATFORM["lyrics"]
+    merged = audit.merge_identity_records([isrc_record, dict(CATALOG_RECORD)])
+    counts = sorted(len(real_platforms(r)) for r in merged)
+    assert counts == [1, 3], "netease-only + apple/youtube/youtubemusic-only"
+    assert all(len(real_platforms(r)) < 4 for r in merged)
 
 
 def test_merge_produces_the_real_five_channel_work():

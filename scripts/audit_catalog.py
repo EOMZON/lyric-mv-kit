@@ -91,21 +91,26 @@ def coverage_row_to_record(row: Mapping[str, Any]) -> dict[str, Any]:
     Note that the ledger carries **flags, not lyric bodies**; pass
     ``--lyrics-source`` when you need content-based identity checks.
     """
+    # A channel is only a *real* (gate-worthy) distribution channel when the
+    # ledger carries an actual URL. A flag set without a URL is "presence
+    # asserted, not proven" — the coverage-ledger twin of the catalog's
+    # DistroKid placeholder trap. We keep that evidence in ``meta`` so reports
+    # can show reach potential, but it must NOT pass the URL-gated selection
+    # (see lyric_mv.dataset.real_platforms, which requires a non-empty URL).
     links: list[dict[str, str]] = []
+    flag_only: list[str] = []
     for flag, key in _COVERAGE_FLAGS.items():
         if not row.get(flag):
             continue
-        url_field = _URL_FIELDS[key]
-        url = str(row.get(url_field) or "")
-        if not url and key == "netease" and row.get("neteaseStatus") == "verified_local_record":
-            url = str(row.get("neteaseUrl") or "")
-        if not url:
-            # The ledger asserts presence through a *verified* flag, not through
-            # a URL string; keep that evidence instead of dropping the channel.
-            url = f"verified-presence:{key}"
-        links.append({"platform": key, "url": url})
+        url = str(row.get(_URL_FIELDS[key]) or "").strip()
+        if url:
+            links.append({"platform": key, "url": url})
+        else:
+            flag_only.append(key)
     meta = {k: row.get(k) for k in ("score", "ready", "identityBasis", "coverageClass",
                                     "lyricsStatus", "masterStatus", "blockers") if k in row}
+    if flag_only:
+        meta["flag_only_channels"] = sorted(flag_only)
     return {
         "id": row.get("recordId"),
         "title": row.get("title"),
@@ -161,9 +166,10 @@ def content_clusters(records: Sequence[dict[str, Any]],
 
     Same title + same artist is not enough: `Neon Snow` exists twice with
     completely different lyric bodies (similarity 0.02) — two different songs
-    sharing a name. Unioning their channels would fabricate a 5-channel work
-    exactly as the 2026-09-20 incident did. `Cha-Cha Groove`, `Cha-Cha Heat`
-    and `Tropical Beat` score 0.99-1.00 and therefore do merge.
+    sharing a name. Unioning their channels would fabricate a richer-than-real
+    work (4 channels, not the 5 a naive flag-count would imply) exactly as the
+    2026-09-20 incident did. `Cha-Cha Groove`, `Cha-Cha Heat` and `Tropical
+    Beat` score 0.99-1.00 and therefore do merge.
     """
     clusters: list[list[dict[str, Any]]] = []
     for record in records:
