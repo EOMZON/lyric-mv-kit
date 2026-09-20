@@ -16,6 +16,9 @@ dist/
 .DS_Store
 Thumbs.db
 
+# WorkBuddy local workspace data (project agent state, staging, memory)
+.workbuddy/
+
 # Test / work artefacts
 work/
 out/

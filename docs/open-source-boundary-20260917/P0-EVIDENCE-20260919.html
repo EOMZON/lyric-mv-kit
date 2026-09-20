@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>lyric-mv-kit P0 边界收口 — 治理证据 2026-09-19</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{ --bg:#0f1115; --card:#171a21; --ink:#e8eaf0; --mut:#9aa3b2; --acc:#7aa2ff; --ok:#46d39a; --warn:#f5b955; --line:#2a2f3a;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;padding:28px}
+  h1{font-size:22px;margin:0 0 4px}
+  .sub{color:var(--mut);margin-bottom:20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0}
+  h2{font-size:16px;margin:0 0 12px;color:var(--acc)}
+  table{border-collapse:collapse;width:100%;font-size:13px}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:#1d2230;color:var(--acc)}
+  code{background:#0c0e12;padding:1px 6px;border-radius:5px;color:#cdd6f4;font-size:12px}
+  .pill{padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600}
+  .ok{background:rgba(70,211,154,.15);color:var(--ok)}
+  .warn{background:rgba(245,185,85,.15);color:var(--warn)}
+  .todo{background:rgba(154,163,178,.15);color:var(--mut)}
+  a{color:var(--acc);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .m{display:flex;justify-content:center;background:#0c0e12;border-radius:10px;padding:10px}
+  ul{margin:8px 0;padding-left:20px}
+</style>
+</head>
+<body>
+<h1>lyric-mv-kit · P0 仓库边界收口 — 治理证据</h1>
+<div class="sub">2026-09-19 · 遵循 test→main 治理 + Merge Reconciliation Gate #29 · 跨仓回执已落地</div>
+
+<div class="card">
+<h2>1. 拆分流向（mermaid）</h2>
+<div class="m"><pre class="mermaid">
+flowchart LR
+  PR2["PR #2 (mixed)"] -->|reusable 13| R5["PR #5 → test<br/>song-free · 636 adds"]
+  PR2 -->|song-specific 23| WB["workbench #9 → test<br/>22 new + 2 identical"]
+  PR2 -->|HOLD| CLOSE["PR #2 CLOSED"]
+  R5 --> MAIN1["lyric-mv-kit main<br/>(待授权)"]
+  WB --> MAIN2["workbench main<br/>(待合 test)"]
+  CLOSE -.->|内容已覆盖| R5
+  CLOSE -.->|内容已覆盖| WB
+</pre></div>
+</div>
+
+<div class="card">
+<h2>2. PR / Issue 状态台账</h2>
+<table>
+<tr><th>类型</th><th>编号</th><th>状态</th><th>说明</th></tr>
+<tr><td>PR</td><td><a href="https://github.com/EOMZON/lyric-mv-kit/pull/5">lyric-mv-kit #5</a></td><td><span class="pill ok">OPEN→test</span></td><td>干净 reusable 集（636 adds，真实标识符 grep=0）</td></tr>
+<tr><td>PR</td><td><a href="https://github.com/EOMZON/lyric-mv-workbench-private/pull/9">workbench #9</a></td><td><span class="pill ok">OPEN→test</span></td><td>song-specific 22 新文件 + retention 台账</td></tr>
+<tr><td>PR</td><td><a href="https://github.com/EOMZON/lyric-mv-kit/pull/2">lyric-mv-kit #2</a></td><td><span class="pill warn">CLOSED</span></td><td>HOLD→close，内容由 #5/#9 覆盖（非合并）</td></tr>
+<tr><td>Issue</td><td><a href="https://github.com/EOMZON/lyric-mv-kit/issues/3">lyric-mv-kit #3</a></td><td><span class="pill ok">回执✓</span></td><td>P0 边界 · P0②✅ P0①⏳</td></tr>
+<tr><td>Issue</td><td><a href="https://github.com/EOMZON/lyric-mv-workbench-private/issues/8">workbench #8</a></td><td><span class="pill ok">回执✓</span></td><td>inbound · 落点决策+证据</td></tr>
+<tr><td>Issue</td><td><a href="https://github.com/EOMZON/v0-project-intelligence-hub/issues/6">hub #6</a></td><td><span class="pill ok">回执✓</span></td><td>跨仓协调 · A 轨道同步</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h2>3. 落点决策证据（过 Gate #29）</h2>
+<table>
+<tr><th>维度</th><th>PR #2 源路径</th><th>workbench 现有路径</th><th>结论</th></tr>
+<tr><td>路径</td><td><code>runs/wind-dream/lyric-paper-staff-v1/.../</code></td><td><code>runs/wind-dream/<b>wind-dream</b>/lyric-paper-staff-v1/.../</code></td><td>多一段 <code>wind-dream/</code>，来自 #1 迁入</td></tr>
+<tr><td>选择</td><td colspan="2"><b>合并到现有 workbench 路径</b>（非 PR #2 源路径）</td><td>避免平行目录 = 禁止的「文件名差不多」陷阱</td></tr>
+</table>
+<h3 style="color:var(--acc);font-size:14px">共享文件对账（无分歧）</h3>
+<table>
+<tr><th>文件</th><th>PR #2 blob</th><th>workbench blob</th><th>结论</th></tr>
+<tr><td>00_source/lyrics-wind-dream.txt</td><td><code>04df28fa</code></td><td><code>04df28fa</code></td><td>字节一致 → 不覆盖</td></tr>
+<tr><td>03_alignment/forced_alignment.json</td><td><code>0ee10bf7</code></td><td><code>0ee10bf7</code></td><td>字节一致 → 不覆盖</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h2>4. retention 台账（跨仓溯源）</h2>
+<p>文件：<code>lyric-mv-workbench-private · manifests/retention/lyric-mv-kit-pr2-inbound-20260919.csv</code></p>
+<ul>
+<li>24 行 = 22 新增 + 2 已有一致；列：workbench_path, size, sha256, ext, source_repo, source_branch, source_commit, source_relative_path, status</li>
+<li>源：<code>EOMZON/lyric-mv-kit @ codex/motion-template-system-v5 · 5f00150e0899ab241f895cf228b29c4514369abb</code></li>
+<li>新增构成：<code>03_render/v5-motion-score/*</code> (21) + <code>samples/.../003-wind-dream-bg.png</code> (1)</li>
+</ul>
+</div>
+
+<div class="card">
+<h2>5. 治理合规自检</h2>
+<table>
+<tr><th>项</th><th>结果</th></tr>
+<tr><td>test→main（无直推 main）</td><td><span class="pill ok">✓</span> PR #5/#9 均 base=test</td></tr>
+<tr><td>无 force-push / 无重写历史</td><td><span class="pill ok">✓</span></td></tr>
+<tr><td>精确路径提交（无 add -A）</td><td><span class="pill ok">✓</span></td></tr>
+<tr><td>落点过 Gate #29（语义对账，非文件名近似）</td><td><span class="pill ok">✓</span></td></tr>
+<tr><td>reusable song-free 验证</td><td><span class="pill ok">✓</span> 真实标识符 grep=0</td></tr>
+<tr><td>retention hash + 跨仓溯源</td><td><span class="pill ok">✓</span></td></tr>
+<tr><td>跨仓回执（#8/#3/#6）</td><td><span class="pill ok">✓</span></td></tr>
+</table>
+</div>
+
+<div class="card">
+<h2>6. 待执行（owner 决策）</h2>
+<table>
+<tr><th>项</th><th>状态</th><th>负责人</th></tr>
+<tr><td>workbench #9 合 test→main</td><td><span class="pill todo">待合</span></td><td>owner</td></tr>
+<tr><td>lyric-mv-kit #5 授权合 main（test→main）</td><td><span class="pill todo">待授权</span></td><td>owner</td></tr>
+<tr><td>P1① <code>docs/analysis/*</code>（10 song 引用）裁剪/迁移</td><td><span class="pill todo">未启</span></td><td>本对话</td></tr>
+<tr><td>P1 README 改 template-first</td><td><span class="pill todo">未启</span></td><td>本对话</td></tr>
+</table>
+</div>
+
+<script>mermaid.initialize({startOnLoad:true,theme:'dark'});</script>
+</body>
+</html>
