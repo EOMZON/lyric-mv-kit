@@ -355,7 +355,7 @@ class Renderer:
                                      FONT_SANS, 24, (170, 185, 215), (50, 90, 170), 10, 0.9)
 
     def line_layers(self, cue):
-        key = (cue["text"], cue["section"])
+        key = id(cue)
         if key in self.type_cache:
             return self.type_cache[key]
         txt = cue["text"]
@@ -373,8 +373,47 @@ class Renderer:
         base = text_layer(txt, None, size, (88, 96, 98), (20, 24, 26), 5, 0.22)
         rec = {"chars": chars, "extents": extents, "whole": whole,
                "base": base, "chorus": chorus, "w": sum(c.width for c in chars)}
+        # Bilingual subtitle: a "translate" line (e.g. the ZH rendering of an EN
+        # lyric) shown *together* with the primary line instead of as a separate,
+        # later cue. Both share the cue's fade envelope, so they appear and
+        # vanish in unison ("一起出现"). Rendered as one subordinate line below.
+        tr = (cue.get("translate") or "").strip()
+        if tr:
+            tsize = self._fit_size(tr, max_w=int(W * 0.82), max_size=76, min_size=40)
+            rec["translate"] = tr
+            rec["tsize"] = tsize
+            rec["whole2"] = text_layer(tr, None, tsize, (202, 214, 230),
+                                      (60, 110, 175), 9, 0.5)
+            rec["base2"] = text_layer(tr, None, tsize, (70, 80, 86),
+                                     (20, 24, 28), 4, 0.16)
+        else:
+            rec["translate"] = ""
         self.type_cache[key] = rec
         return rec
+
+    def _fit_size(self, txt, max_w, max_size, min_size=40):
+        """Largest font size where ``txt`` fits within ``max_w`` pixels."""
+        lo, hi = min_size, max_size
+        best = min_size
+        while lo <= hi:
+            mid = (lo + hi) // 2
+            w = font(FONT_SANS, mid).getlength(txt)
+            if w <= max_w:
+                best = mid
+                lo = mid + 1
+            else:
+                hi = mid - 1
+        return best
+
+    def _draw_translate(self, img, rec, alpha, cy, bass):
+        if not rec["translate"] or alpha <= 0.004:
+            return
+        L, B = rec["whole2"], rec["base2"]
+        gap = 16
+        yc = cy + rec["whole"].height / 2 + gap + L.height / 2
+        sc = 1.0 + 0.015 * bass
+        paste(img, B, W / 2, yc, alpha * 0.82, sc)
+        paste(img, L, W / 2, yc, alpha * 0.9, sc)
 
     # -------------------------------------------------------------- sections
     def section_at(self, t):
@@ -501,6 +540,11 @@ class Renderer:
             self._draw_chorus(img, rec, u, alpha, cy, i, bass)
         else:
             self._draw_plain(img, rec, cue, u, alpha, cy, bass, acc_i)
+
+        # Bilingual subtitle (if this cue carries a "translate" line): rendered
+        # below the primary with the SAME envelope so it appears in unison
+        # ("一起出现") instead of as a separate, later cue.
+        self._draw_translate(img, rec, alpha, cy, bass)
 
     def _draw_plain(self, img, rec, cue, u, alpha, cy, bass, acc):
         L = rec["whole"]
