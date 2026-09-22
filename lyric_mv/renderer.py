@@ -361,7 +361,13 @@ class Renderer:
         txt = cue["text"]
         acc = ACCENT.get(cue["section"], (120, 200, 255))
         chorus = cue["section"].startswith("chorus")
-        size = 158 if chorus else 138
+        # kit#12 fix: a fixed 158/138 clipped long EN lines past the 1920px
+        # frame. Fit the advance width to <=0.84W so the widest safe scale
+        # (chorus tail ~1.13x, plain tail+bass ~1.12x) never pushes ink
+        # off-frame. Budget is the glyph_extent-sum -- the exact advance the
+        # chorus/plain layouts use -- so the fit matches the render 1:1.
+        size = self._fit_size(txt, max_w=int(W * 0.84),
+                              max_size=158 if chorus else 138, min_size=96)
         glow = acc
         chars = []
         extents = []
@@ -372,7 +378,8 @@ class Renderer:
         whole = text_layer(txt, None, size, (238, 241, 238), glow, 14, 0.60)
         base = text_layer(txt, None, size, (88, 96, 98), (20, 24, 26), 5, 0.22)
         rec = {"chars": chars, "extents": extents, "whole": whole,
-               "base": base, "chorus": chorus, "w": sum(c.width for c in chars)}
+               "base": base, "chorus": chorus, "size": size,
+               "w": sum(c.width for c in chars)}
         # Bilingual subtitle: a "translate" line (e.g. the ZH rendering of an EN
         # lyric) shown *together* with the primary line instead of as a separate,
         # later cue. Both share the cue's fade envelope, so they appear and
@@ -392,12 +399,13 @@ class Renderer:
         return rec
 
     def _fit_size(self, txt, max_w, max_size, min_size=40):
-        """Largest font size where ``txt`` fits within ``max_w`` pixels."""
+        """Largest font size where ``txt``'s advance width (glyph_extent-sum,
+        the exact metric the chorus/plain layouts use) fits within ``max_w``."""
         lo, hi = min_size, max_size
         best = min_size
         while lo <= hi:
             mid = (lo + hi) // 2
-            w = font(FONT_SANS, mid).getlength(txt)
+            w = sum(glyph_extent(ch, mid)[0] for ch in txt)
             if w <= max_w:
                 best = mid
                 lo = mid + 1
