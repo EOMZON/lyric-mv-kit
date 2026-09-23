@@ -139,6 +139,36 @@ flowchart LR
   Q --> R
 ~~~
 
+## 9. 治理/接手补充
+
+### 状态机
+
+```
+SOURCE_SAVED → TEST_VERIFIED → SEMANTICALLY_RECONCILED → MAIN_MERGED → MAIN_READBACK → CONSUMER_UPDATED → ISSUE_CLOSED
+```
+
+- `SOURCE_SAVED` 只表示 GitHub remote 上存在可恢复的真实 source。
+- `TEST_VERIFIED` 不代表 main 已发布。
+- `MAIN_MERGED` 不代表 workbench 已消费。
+- `CONSUMER_UPDATED` 必须记录 consumer 当前读取的 renderer source SHA。
+- 任一层缺证据，状态必须停在对应 lifecycle，不得向后跳跃。
+
+### 相关历史 Issue / PR pointer
+
+- kit#12：width-adaptive 主歌词行；历史修复 `0090b18` 当前缺 remote object，等待 source recovery。
+- kit#14：open-source boundary；历史 `2e5e3a8` 当前缺 remote object，等待 source recovery。
+- kit#15：Phase1 Data / Domain / Projection，source `b8eb5fb...`。
+- kit#16：本仓 branch lifecycle / release evidence canonical。
+- kit#7：public/private semantic reconciliation。
+- kit#13：2 canonical anchor templates 文档口径，等待用户拍板。
+- PR #17：本复盘文档，目标 main，当前尚未合入。
+- product-hub#6：MV 主线跨仓协调。
+- product-hub#11：branch/worktree lifecycle 跨仓协调。
+
+### 不应再扩张的范围
+
+本轮主线不新增 batch producer、publication、无直接 dependency 的 Product Hub 任务；先完成 P0 release chain 与 Phase1 componentization，再进入 Phase2。
+
 ## 9. 接手检查表
 1. source ref 在远端吗？
 2. test exact SHA 是什么？
