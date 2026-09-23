@@ -1,0 +1,66 @@
+# Style presets — editable DATA source for lyric_mv (Data / UI separation).
+#
+# The renderer (UI) should read StyleSpec from here instead of hard-coding
+# palettes. Keep values 1:1 with lyric_mv/data/presets.py DEFAULT_PRESETS
+# unless you intend a deliberate template change.
+#
+# Sections: verse1 / break / chorus1 / verse2 / chorus2 / outro
+# RGB tuples are [r, g, b] in 0..255.
+
+aurora_ribbon:
+  accent:
+    verse1: [88, 150, 170]
+    break: [112, 130, 140]
+    chorus1: [188, 142, 102]
+    verse2: [82, 146, 166]
+    chorus2: [194, 148, 106]
+    outro: [112, 142, 158]
+  ribbons:
+    - [0.9, 1.7, 0.42, [50, 235, 205]]    # teal
+    - [2.4, 2.3, 0.36, [150, 95, 255]]   # violet
+    - [4.1, 3.1, 0.30, [255, 110, 165]]  # pink
+  spectrum_stops:
+    - [40, 235, 205]
+    - [120, 140, 255]
+    - [255, 120, 175]
+    - [40, 235, 205]
+  video_size: [1920, 1080]
+  cover_sizes:
+    standard: [1146, 860]
+    wide: [1146, 717]
+    youtube: [1280, 720]
+  hud:
+    margin: 80
+    brand_size: 24
+    label_size: 18
+    sub_size: 30
+    label: AURORA
+
+paper_staff:
+  accent:
+    verse1: [70, 90, 120]
+    break: [110, 120, 130]
+    chorus1: [150, 110, 90]
+    verse2: [80, 100, 130]
+    chorus2: [160, 120, 95]
+    outro: [100, 120, 140]
+  ribbons:
+    - [1.0, 1.4, 0.30, [90, 200, 210]]
+    - [2.6, 2.0, 0.26, [140, 120, 230]]
+    - [4.3, 2.8, 0.22, [220, 130, 170]]
+  spectrum_stops:
+    - [60, 210, 215]
+    - [130, 150, 240]
+    - [230, 140, 180]
+    - [60, 210, 215]
+  video_size: [1920, 1080]
+  cover_sizes:
+    standard: [1146, 860]
+    wide: [1146, 717]
+    youtube: [1280, 720]
+  hud:
+    margin: 80
+    brand_size: 24
+    label_size: 18
+    sub_size: 30
+    label: PAPER
