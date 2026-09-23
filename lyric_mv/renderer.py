@@ -78,6 +78,14 @@ def glyph_font(ch):
     """First font in FONT_FALLBACKS that renders `ch` as a real glyph."""
     if ch in _glyph_font_cache:
         return _glyph_font_cache[ch]
+    if ch.isspace():
+        # Whitespace must stay blank. Some CJK faces ship an inked U+0020 or a
+        # .notdef box narrow enough to slip past the 70%-cell check below,
+        # which painted a hollow rectangle between words (kit#6 resurfacing in
+        # the lyric path). Latin faces carry a proper blank space with a real
+        # advance width; text_layer()/glyph_extent() never draw whitespace ink.
+        _glyph_font_cache[ch] = FONT_LATIN
+        return FONT_LATIN
     for fp in FONT_FALLBACKS:
         f = font(fp, 150)
         im = Image.new("L", (260, 260), 0)
@@ -106,8 +114,12 @@ def glyph_extent(ch, size, path=None):
         return _glyph_extent_cache[key]
     fp = path if path is not None else glyph_font(ch)
     f = font(fp, size)
-    bb = ImageDraw.Draw(Image.new("RGBA", (8, 8))).textbbox((0, 0), ch, font=f)
-    ext = (bb[2] - bb[0], bb[3] - bb[1], bb[0], bb[1])
+    if ch.isspace():
+        # advance-only: whitespace carries width but never ink (see glyph_font)
+        ext = (max(1, round(f.getlength(ch))), 0, 0, 0)
+    else:
+        bb = ImageDraw.Draw(Image.new("RGBA", (8, 8))).textbbox((0, 0), ch, font=f)
+        ext = (bb[2] - bb[0], bb[3] - bb[1], bb[0], bb[1])
     _glyph_extent_cache[key] = ext
     return ext
 
@@ -129,13 +141,22 @@ def text_layer(text, path, size, fill, glow_rgb, glow_radius=30, glow_boost=1.35
     for ch in chars:
         fp = path if path is not None else glyph_font(ch)
         f = font(fp, size)
-        l, t, r, b = probe.textbbox((0, 0), ch, font=f)
-        measured.append((ch, f, l, t, r, b))
+        if ch.isspace():
+            # advance-only: whitespace contributes real width but zero ink, so
+            # a CJK face's inked/.notdef U+0020 can never paint a box (kit#6)
+            measured.append((ch, f, 0, 0, max(1, round(f.getlength(ch))), 0))
+        else:
+            l, t, r, b = probe.textbbox((0, 0), ch, font=f)
+            measured.append((ch, f, l, t, r, b))
 
-    min_l = min(m[2] for m in measured)
-    min_t = min(m[3] for m in measured)
-    max_r = max(m[4] for m in measured)
-    max_b = max(m[5] for m in measured)
+    visible = [m for m in measured if not m[0].isspace()]
+    if visible:
+        min_l = min(m[2] for m in visible)
+        min_t = min(m[3] for m in visible)
+        max_r = max(m[4] for m in visible)
+        max_b = max(m[5] for m in visible)
+    else:
+        min_l = min_t = max_r = max_b = 0
     total_text_w = sum(m[4] - m[2] for m in measured)
     text_h = max_b - min_t
 
@@ -146,7 +167,8 @@ def text_layer(text, path, size, fill, glow_rgb, glow_radius=30, glow_boost=1.35
     md = ImageDraw.Draw(mask)
     x = pad - min_l
     for ch, f, l, t, r, b in measured:
-        md.text((x, pad - min_t), ch, font=f, fill=255)
+        if not ch.isspace():
+            md.text((x, pad - min_t), ch, font=f, fill=255)
         x += r - l
 
     sw, sh = max(1, LW // 6), max(1, LH // 6)

@@ -186,9 +186,13 @@ def render_cover(title, subtitle="", out="cover.png", W=STANDARD_SIZE[0],
     draw_spectrum(img, W, H, energy=energy)
 
     # ---- hero: the song title, centred, auto-fitted ----
+    # kit#6: the CJK heavy serif paints ink on U+0020 (space renders as a
+    # tofu box), so pure-latin titles must go to the latin face -- same rule
+    # as renderer.glyph_font() routing whitespace away from the heavy face.
+    title_face = FONT_LATIN if title.isascii() else FONT_HEAVY
     target_w = int(W * 0.74)
-    size = fit_font_size(title, FONT_HEAVY, target_w, max_size=int(190 * scale) + 60)
-    tl = text_layer(title, FONT_HEAVY, size, INK, GLOW,
+    size = fit_font_size(title, title_face, target_w, max_size=int(190 * scale) + 60)
+    tl = text_layer(title, title_face, size, INK, GLOW,
                     gr=max(8, int(26 * scale)), ga=0.95)
     tx = (W - tl.width) // 2
     ty = int(H * 0.40) - tl.height // 2     # slightly above centre, room for spectrum
