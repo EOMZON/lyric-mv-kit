@@ -384,15 +384,19 @@ class Renderer:
         # lyric) shown *together* with the primary line instead of as a separate,
         # later cue. Both share the cue's fade envelope, so they appear and
         # vanish in unison ("一起出现"). Rendered as one subordinate line below.
+        # English-primary balance (2026-10-12 user direction): the EN lyric is
+        # the lead; the ZH rendering is a small, dim auxiliary caption -- not a
+        # second competing line. Capped far below the primary size, sans face,
+        # reduced alpha.
         tr = (cue.get("translate") or "").strip()
         if tr:
-            tsize = self._fit_size(tr, max_w=int(W * 0.82), max_size=76, min_size=40)
+            tsize = self._fit_size(tr, max_w=int(W * 0.42), max_size=44, min_size=26)
             rec["translate"] = tr
             rec["tsize"] = tsize
-            rec["whole2"] = text_layer(tr, None, tsize, (202, 214, 230),
-                                      (60, 110, 175), 9, 0.5)
-            rec["base2"] = text_layer(tr, None, tsize, (70, 80, 86),
-                                     (20, 24, 28), 4, 0.16)
+            rec["whole2"] = text_layer(tr, FONT_SANS, tsize, (176, 188, 204),
+                                       (52, 92, 150), 6, 0.35)
+            rec["base2"] = text_layer(tr, FONT_SANS, tsize, (58, 66, 74),
+                                      (20, 24, 28), 3, 0.12)
         else:
             rec["translate"] = ""
         self.type_cache[key] = rec
@@ -417,11 +421,11 @@ class Renderer:
         if not rec["translate"] or alpha <= 0.004:
             return
         L, B = rec["whole2"], rec["base2"]
-        gap = 16
+        gap = 22
         yc = cy + rec["whole"].height / 2 + gap + L.height / 2
-        sc = 1.0 + 0.015 * bass
-        paste(img, B, W / 2, yc, alpha * 0.82, sc)
-        paste(img, L, W / 2, yc, alpha * 0.9, sc)
+        sc = 1.0 + 0.012 * bass
+        paste(img, B, W / 2, yc, alpha * 0.62, sc)
+        paste(img, L, W / 2, yc, alpha * 0.72, sc)
 
     # -------------------------------------------------------------- sections
     def section_at(self, t):
