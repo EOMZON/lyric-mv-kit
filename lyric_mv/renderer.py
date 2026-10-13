@@ -46,6 +46,21 @@ FONT_FALLBACKS = [
 #: ``brand:`` in config.yaml.
 BRAND = _cfg.brand()
 
+
+def aux_font(text: str) -> str:
+    """Font for the auxiliary (translate) line.
+
+    The latin display face for pure-Latin captions, CJK sans otherwise — so
+    both template directions look right: EN-primary renders the ZH auxiliary
+    in sans, ZH-primary renders the EN auxiliary in the latin face. Falls back
+    to sans when no latin face is configured.
+    """
+    cjk = any("\u2e80" <= ch <= "\u9fff" or "\uac00" <= ch <= "\ud7af"
+              or "\uff00" <= ch <= "\uffef" for ch in text)
+    if not cjk and FONT_LATIN:
+        return FONT_LATIN
+    return FONT_SANS
+
 # section -> accent colour used for the aurora + type glow
 # Restrained editorial palette: ink blue + silver text + one mineral accent.
 ACCENT = {
@@ -393,9 +408,10 @@ class Renderer:
             tsize = self._fit_size(tr, max_w=int(W * 0.42), max_size=44, min_size=26)
             rec["translate"] = tr
             rec["tsize"] = tsize
-            rec["whole2"] = text_layer(tr, FONT_SANS, tsize, (176, 188, 204),
+            af = aux_font(tr)
+            rec["whole2"] = text_layer(tr, af, tsize, (176, 188, 204),
                                        (52, 92, 150), 6, 0.35)
-            rec["base2"] = text_layer(tr, FONT_SANS, tsize, (58, 66, 74),
+            rec["base2"] = text_layer(tr, af, tsize, (58, 66, 74),
                                       (20, 24, 28), 3, 0.12)
         else:
             rec["translate"] = ""
