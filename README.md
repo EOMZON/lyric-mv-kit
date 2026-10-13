@@ -92,18 +92,50 @@ That's the entire happy path. The full CLI surface:
 
 ```text
 $ python -m lyric_mv --help
-usage: lyric-mv [-h] {check,styles,build-plan,render,preview,demo,cover} ...
+usage: lyric-mv [-h] {check,styles,templates,build-plan,render,preview,demo,cover,gate,pipeline} ...
 
 positional arguments:
-  {check,styles,build-plan,render,preview,demo,cover}
+  {check,styles,templates,build-plan,render,preview,demo,cover,gate,pipeline}
     check                verify ffmpeg + fonts
     styles               list available styles
+    templates            list language-primary templates
     build-plan           audio + lyrics -> plan.json
     render               plan.json -> full-song mp4
     preview              render stills at given timestamps
     demo                 short audio-bearing clip per style
     cover                4:3 / 16:9 / 16:10 cover art
+    gate                 fail-closed pre-render alignment-sync gate
+    pipeline             song-agnostic production pipeline (see docs/PIPELINE.md)
 ```
+
+---
+
+## Pipeline — any song, word-accurate
+
+The quickstart above gives you beat-grid cue timing (drift of seconds is
+normal on long held notes). For a release-grade MV where every line lands on
+the vocals, run the production pipeline: Demucs vocal isolation → word-level
+ground truth (two independent whisper timelines, adjudicated against the stem
+energy) → fail-closed sync gate → render.
+
+```bash
+pip install -U openai-whisper stable-ts demucs   # optional alignment stack
+
+python -m lyric_mv pipeline run \
+    --audio song.wav --lyrics lyrics.txt --song song.json \
+    --template aurora-ribbon-en-primary \
+    --work work/ --out out/mv.mp4
+```
+
+Templates come in language-primary variants (`python -m lyric_mv templates`):
+
+| Template | Primary line | Auxiliary line |
+| --- | --- | --- |
+| `aurora-ribbon-en-primary` | English lyric (big kinetic type) | Chinese translation (small, dim) |
+| `aurora-ribbon-zh-primary` | Chinese lyric (big kinetic type) | English original (small, dim) |
+
+See [docs/PIPELINE.md](docs/PIPELINE.md) for the stage list, resume patterns,
+gate rules, and the word-level verification checklist.
 
 ---
 
@@ -137,6 +169,11 @@ Every piece of the diagram is a single-file Python module in `lyric_mv/`:
 | `plan.py` | 130 | clean lyrics → build `plan.json`; auto or hand-aligned timings |
 | `align.py` | 100 | optional Whisper + stable-ts; produces `cue_times` |
 | `separate.py` | 40 | optional Demucs vocal-stem extraction |
+| `gt.py` | 260 | word-level ground truth: TR+AL timelines → rebuilt cue timings |
+| `bilingual.py` | 90 | pair translation lines into primary/auxiliary bilingual cues |
+| `templates.py` | 60 | language-primary template registry |
+| `gate.py` | 110 | fail-closed pre-render alignment-sync gate |
+| `pipeline.py` | 300 | song-agnostic production pipeline (any song → MV) |
 | `renderer.py` | 670 | the base `Renderer` class (background / spectrum / particles / lyric / HUD) |
 | `styles_ad.py` | 400 | A–D style subclasses |
 | `styles_eh.py` | 500 | E–H style subclasses + demo-clip renderer |

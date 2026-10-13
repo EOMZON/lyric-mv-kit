@@ -2,11 +2,14 @@
 
     python -m lyric_mv check                      # verify fonts + ffmpeg
     python -m lyric_mv styles                     # list the 8 styles
+    python -m lyric_mv templates                  # list language-primary templates
     python -m lyric_mv build-plan   ...           # audio + lyrics -> plan.json
     python -m lyric_mv render       ...           # plan.json -> full-song mp4
     python -m lyric_mv preview      ...           # stills at given timestamps
     python -m lyric_mv demo         ...           # short audio-bearing clip
     python -m lyric_mv cover        ...           # 4:3 cover art
+    python -m lyric_mv gate         ...           # fail-closed sync gate (pre-render)
+    python -m lyric_mv pipeline run ...           # any song -> MV (see docs/PIPELINE.md)
 """
 
 from __future__ import annotations
@@ -55,6 +58,21 @@ def cmd_check(args):
     print(f"brand       : {cfg.brand()}")
     print("\nOK" if ok else "\nNOT READY — see the messages above")
     return 0 if ok else 1
+
+
+def cmd_templates(args):
+    from . import templates
+
+    for name in templates.names():
+        t = templates.get(name)
+        print(f"  {name:28s} style={t['style']:18s} primary={t['primary']}  {t['summary']}")
+    return 0
+
+
+def cmd_gate(args):
+    from . import gate
+
+    return gate.run(args.plan, args.align, args.max_fallback, args.max_diverge)
 
 
 def cmd_styles(args):
@@ -228,6 +246,17 @@ def build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("check", help="verify ffmpeg + fonts").set_defaults(func=cmd_check)
     sub.add_parser("styles", help="list available styles").set_defaults(func=cmd_styles)
+    sub.add_parser("templates", help="list language-primary templates").set_defaults(func=cmd_templates)
+
+    p = sub.add_parser("gate", help="fail-closed pre-render alignment-sync gate")
+    p.add_argument("--plan", required=True, help="plan json (rendered cues)")
+    p.add_argument("--align", required=True, help="raw alignment provenance json")
+    p.add_argument("--max-fallback", type=int, default=0)
+    p.add_argument("--max-diverge", type=float, default=1.0)
+    p.set_defaults(func=cmd_gate)
+
+    from .pipeline import add_pipeline_parser
+    add_pipeline_parser(sub)
 
     p = sub.add_parser("build-plan", help="audio + lyrics -> plan.json")
     p.add_argument("--audio", required=True)
