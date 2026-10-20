@@ -98,8 +98,6 @@ class Style(render.Renderer):
 
     def draw_hud(self, img, t):
         d = ImageDraw.Draw(img, "RGBA")
-        wm = text_layer("ROYAZON", FONT_LATIN, 24, self.INK, self.GLOW, 8, 0.9)
-        img.paste(wm, (80, 62), wm)
         cl = self.corner_layer
         img.paste(cl, (W - 80 - cl.width, 56), cl)
         x0, x1, y = 80, W - 80, H - 74

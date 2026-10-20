@@ -98,14 +98,33 @@ def transcribe_words(stem: Path | str, language: str = "en",
     return words
 
 
+def _space_cjk(text: str) -> str:
+    """Insert spaces around every CJK character.
+
+    stable-whisper's ``align`` tokenises CJK into word-level units, which then
+    merge common bigrams (慢慢/所有/下一…). ``rebuild`` chunks the AL timeline by
+    per-character token counts, so the two must agree. Spacing every CJK char
+    forces one token per character, matching :func:`tokens_of` exactly. Latin
+    words are untouched, so this is a no-op for ``en`` songs.
+    """
+    out = []
+    for ch in text:
+        if re.match(r"[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]", ch):
+            out.append(" " + ch + " ")
+        else:
+            out.append(ch)
+    return "".join(out).replace("  ", " ").strip()
+
+
 def align_words(stem: Path | str, lyrics_text: str, language: str = "en",
                 model_size: str = "small",
                 out: Path | str | None = None) -> list[dict]:
     """AL: force-align the full known lyric text onto the stem."""
     import stable_whisper
 
+    text = _space_cjk(lyrics_text) if language.startswith("zh") else lyrics_text
     model = stable_whisper.load_model(model_size)
-    res = model.align(str(stem), lyrics_text, language=language)
+    res = model.align(str(stem), text, language=language)
     words = [{"start": round(w.start, 3), "end": round(w.end, 3), "word": w.word.strip()}
              for seg in res.segments for w in seg.words]
     if out:

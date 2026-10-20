@@ -206,9 +206,9 @@ def render_cover(title, subtitle="", out="cover.png", W=STANDARD_SIZE[0],
 
     if show_hud:
         m = int(HUD_MARGIN * scale)
-        wm = text_layer(BRAND, FONT_LATIN, max(12, int(HUD_BRAND_SIZE * scale)),
-                        INK, GLOW, gr=max(4, int(8 * scale)), ga=0.9)
-        img.paste(wm, (m, int(62 * scale)), wm)
+        # owner 2026-10-15: no artist wordmark on public covers (same rule as
+        # the renderer watermark removal). Brand paste removed; keep 《title》,
+        # divider and label.
 
         cs = max(12, int(HUD_BRAND_SIZE * scale))
         cl = text_layer(f"《{title}》", FONT_SANS, cs, (200, 216, 240), GLOW,
