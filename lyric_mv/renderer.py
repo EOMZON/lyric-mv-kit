@@ -46,6 +46,21 @@ FONT_FALLBACKS = [
 #: ``brand:`` in config.yaml.
 BRAND = _cfg.brand()
 
+
+def aux_font(text: str) -> str:
+    """Font for the auxiliary (translate) line.
+
+    The latin display face for pure-Latin captions, CJK sans otherwise — so
+    both template directions look right: EN-primary renders the ZH auxiliary
+    in sans, ZH-primary renders the EN auxiliary in the latin face. Falls back
+    to sans when no latin face is configured.
+    """
+    cjk = any("\u2e80" <= ch <= "\u9fff" or "\uac00" <= ch <= "\ud7af"
+              or "\uff00" <= ch <= "\uffef" for ch in text)
+    if not cjk and FONT_LATIN:
+        return FONT_LATIN
+    return FONT_SANS
+
 # section -> accent colour used for the aurora + type glow
 # Restrained editorial palette: ink blue + silver text + one mineral accent.
 ACCENT = {
@@ -78,6 +93,14 @@ def glyph_font(ch):
     """First font in FONT_FALLBACKS that renders `ch` as a real glyph."""
     if ch in _glyph_font_cache:
         return _glyph_font_cache[ch]
+    if ch.isspace():
+        # Whitespace must stay blank. Some CJK faces ship an inked U+0020 or a
+        # .notdef box narrow enough to slip past the 70%-cell check below,
+        # which painted a hollow rectangle between words (kit#6 resurfacing in
+        # the lyric path). Latin faces carry a proper blank space with a real
+        # advance width; text_layer()/glyph_extent() never draw whitespace ink.
+        _glyph_font_cache[ch] = FONT_LATIN
+        return FONT_LATIN
     for fp in FONT_FALLBACKS:
         f = font(fp, 150)
         im = Image.new("L", (260, 260), 0)
@@ -106,8 +129,12 @@ def glyph_extent(ch, size, path=None):
         return _glyph_extent_cache[key]
     fp = path if path is not None else glyph_font(ch)
     f = font(fp, size)
-    bb = ImageDraw.Draw(Image.new("RGBA", (8, 8))).textbbox((0, 0), ch, font=f)
-    ext = (bb[2] - bb[0], bb[3] - bb[1], bb[0], bb[1])
+    if ch.isspace():
+        # advance-only: whitespace carries width but never ink (see glyph_font)
+        ext = (max(1, round(f.getlength(ch))), 0, 0, 0)
+    else:
+        bb = ImageDraw.Draw(Image.new("RGBA", (8, 8))).textbbox((0, 0), ch, font=f)
+        ext = (bb[2] - bb[0], bb[3] - bb[1], bb[0], bb[1])
     _glyph_extent_cache[key] = ext
     return ext
 
@@ -129,13 +156,22 @@ def text_layer(text, path, size, fill, glow_rgb, glow_radius=30, glow_boost=1.35
     for ch in chars:
         fp = path if path is not None else glyph_font(ch)
         f = font(fp, size)
-        l, t, r, b = probe.textbbox((0, 0), ch, font=f)
-        measured.append((ch, f, l, t, r, b))
+        if ch.isspace():
+            # advance-only: whitespace contributes real width but zero ink, so
+            # a CJK face's inked/.notdef U+0020 can never paint a box (kit#6)
+            measured.append((ch, f, 0, 0, max(1, round(f.getlength(ch))), 0))
+        else:
+            l, t, r, b = probe.textbbox((0, 0), ch, font=f)
+            measured.append((ch, f, l, t, r, b))
 
-    min_l = min(m[2] for m in measured)
-    min_t = min(m[3] for m in measured)
-    max_r = max(m[4] for m in measured)
-    max_b = max(m[5] for m in measured)
+    visible = [m for m in measured if not m[0].isspace()]
+    if visible:
+        min_l = min(m[2] for m in visible)
+        min_t = min(m[3] for m in visible)
+        max_r = max(m[4] for m in visible)
+        max_b = max(m[5] for m in visible)
+    else:
+        min_l = min_t = max_r = max_b = 0
     total_text_w = sum(m[4] - m[2] for m in measured)
     text_h = max_b - min_t
 
@@ -146,7 +182,8 @@ def text_layer(text, path, size, fill, glow_rgb, glow_radius=30, glow_boost=1.35
     md = ImageDraw.Draw(mask)
     x = pad - min_l
     for ch, f, l, t, r, b in measured:
-        md.text((x, pad - min_t), ch, font=f, fill=255)
+        if not ch.isspace():
+            md.text((x, pad - min_t), ch, font=f, fill=255)
         x += r - l
 
     sw, sh = max(1, LW // 6), max(1, LH // 6)
@@ -320,10 +357,8 @@ class Renderer:
         for ch in self.p["title"]:
             self.title_chars.append((ch, text_layer(ch, None, 168,
                                                     (245, 248, 255), (120, 190, 255), 34, 1.5)))
-        self.sub_layer = text_layer(f"{BRAND}  ·  《{self.p['album']}》",
+        self.sub_layer = text_layer(f"《{self.p['album']}》",
                                     FONT_SANS, 40, (200, 215, 240), (60, 130, 220), 16, 1.0)
-        self.wm_layer = text_layer(BRAND, FONT_LATIN, 26, (235, 240, 255),
-                                   (110, 150, 255), 12, 1.1)
         # top-right now shows the song title (per user direction 2026-09-02),
         # not the album; the artist name is intentionally hidden.
         self.corner_layer = text_layer(f"《{self.p['title']}》",
@@ -333,14 +368,89 @@ class Renderer:
                                      FONT_SANS, 24, (170, 185, 215), (50, 90, 170), 10, 0.9)
 
     def line_layers(self, cue):
-        key = (cue["text"], cue["section"])
+        key = id(cue)
         if key in self.type_cache:
             return self.type_cache[key]
         txt = cue["text"]
         acc = ACCENT.get(cue["section"], (120, 200, 255))
         chorus = cue["section"].startswith("chorus")
-        size = 158 if chorus else 138
+        # kit#12 fix: a fixed 158/138 clipped long EN lines past the 1920px
+        # frame. Fit the advance width to <=0.84W so the widest safe scale
+        # (chorus tail ~1.13x, plain tail+bass ~1.12x) never pushes ink
+        # off-frame. Budget is the glyph_extent-sum -- the exact advance the
+        # chorus/plain layouts use -- so the fit matches the render 1:1.
+        max_w = int(W * 0.84)
+        max_size = 158 if chorus else 138
+        size = self._fit_size(txt, max_w=max_w, max_size=max_size, min_size=96)
+        adv = sum(glyph_extent(ch, size)[0] for ch in txt)
         glow = acc
+        if adv <= max_w:
+            parts = [self._build_line_rec(txt, size, glow, chorus)]
+            psize = size
+        else:
+            # kit#25 fix: EN lyrical lines run 40+ chars -- wider than the
+            # 0.84W budget even at the 96px floor, so shrink-only (kit#12)
+            # clips both ends. Wrap into balanced sub-lines at word
+            # boundaries (even char split for spaceless scripts) and take
+            # the largest size keeping every sub-line inside the budget;
+            # prefer fewer lines unless an extra line buys >=8px of type.
+            part_strs, psize = self._wrap_text(txt, max_w, max_size)
+            parts = [self._build_line_rec(p, psize, glow, chorus)
+                     for p in part_strs]
+        # Visual line height: text_layer heights carry ~size*0.95 glow padding
+        # on both sides, so whole.height is NOT the visual row height. Using it
+        # pushed stacked lines (and the translate caption below them) off-canvas
+        # -- paste() then silently dropped the whole layer (kit#25.1).
+        pad = int(psize * 0.95)
+        text_h = max(1, parts[0]["whole"].height - 2 * pad)
+        rec = {"parts": parts, "nlines": len(parts), "chorus": chorus,
+               "size": psize, "w": sum(pt["w"] for pt in parts),
+               "text_h": text_h, "line_h": text_h + 30}
+        if len(parts) == 1:
+            rec.update(parts[0])
+        else:
+            # flat keys alias part 0 (translate anchoring + back-compat)
+            rec["whole"] = parts[0]["whole"]
+            rec["base"] = parts[0]["base"]
+        # Bilingual subtitle: a "translate" line (e.g. the ZH rendering of an EN
+        # lyric) shown *together* with the primary line instead of as a separate,
+        # later cue. Both share the cue's fade envelope, so they appear and
+        # vanish in unison ("一起出现"). Rendered as one subordinate line below.
+        # English-primary balance (2026-10-12 user direction): the EN lyric is
+        # the lead; the ZH rendering is a small, dim auxiliary caption -- not a
+        # second competing line. Capped far below the primary size, sans face,
+        # reduced alpha.
+        tr = (cue.get("translate") or "").strip()
+        if tr:
+            tsize = self._fit_size(tr, max_w=int(W * 0.42), max_size=44, min_size=26)
+            rec["translate"] = tr
+            rec["tsize"] = tsize
+            af = aux_font(tr)
+            rec["whole2"] = text_layer(tr, af, tsize, (176, 188, 204),
+                                       (52, 92, 150), 6, 0.35)
+            rec["base2"] = text_layer(tr, af, tsize, (58, 66, 74),
+                                      (20, 24, 28), 3, 0.12)
+        else:
+            rec["translate"] = ""
+        self.type_cache[key] = rec
+        return rec
+
+    def _fit_size(self, txt, max_w, max_size, min_size=40):
+        """Largest font size where ``txt``'s advance width (glyph_extent-sum,
+        the exact metric the chorus/plain layouts use) fits within ``max_w``."""
+        lo, hi = min_size, max_size
+        best = min_size
+        while lo <= hi:
+            mid = (lo + hi) // 2
+            w = sum(glyph_extent(ch, mid)[0] for ch in txt)
+            if w <= max_w:
+                best = mid
+                lo = mid + 1
+            else:
+                hi = mid - 1
+        return best
+
+    def _build_line_rec(self, txt, size, glow, chorus):
         chars = []
         extents = []
         for ch in txt:
@@ -349,10 +459,87 @@ class Renderer:
             extents.append(glyph_extent(ch, size))
         whole = text_layer(txt, None, size, (238, 241, 238), glow, 14, 0.60)
         base = text_layer(txt, None, size, (88, 96, 98), (20, 24, 26), 5, 0.22)
-        rec = {"chars": chars, "extents": extents, "whole": whole,
-               "base": base, "chorus": chorus, "w": sum(c.width for c in chars)}
-        self.type_cache[key] = rec
-        return rec
+        return {"chars": chars, "extents": extents, "whole": whole,
+                "base": base, "chorus": chorus, "size": size,
+                "w": sum(c.width for c in chars)}
+
+    def _balance_words(self, words, n):
+        """Contiguous n-way word partition minimising the widest part."""
+        def width(s):
+            return sum(glyph_extent(ch, 100)[0] for ch in s)
+        m = len(words)
+
+        def dp(k, i):
+            if k == 1:
+                return width(" ".join(words[i:])), []
+            best = (float("inf"), None)
+            for j in range(i + 1, m - k + 2):
+                w = width(" ".join(words[i:j]))
+                sub, cuts = dp(k - 1, j)
+                val = max(w, sub)
+                if val < best[0]:
+                    best = (val, [j] + cuts)
+            return best
+
+        _, cuts = dp(n, 0)
+        parts, start = [], 0
+        for c in cuts:
+            parts.append(" ".join(words[start:c]))
+            start = c
+        parts.append(" ".join(words[start:]))
+        return parts
+
+    def _wrap_text(self, txt, max_w, max_size):
+        """kit#25: balanced word-boundary wrap for over-wide lines.
+
+        Returns (parts, size). Tries 2 then 3 sub-lines, picking the
+        largest size in [96, max_size] that keeps every sub-line inside
+        ``max_w``; prefers fewer lines unless an extra line buys >=8px.
+        Falls back to an even char split for spaceless/pathological input.
+        """
+        def width(s, size):
+            return sum(glyph_extent(ch, size)[0] for ch in s)
+
+        words = txt.split(" ")
+        cands = []
+        for n in (2, 3):
+            if n > len(words):
+                break
+            parts = self._balance_words(words, n)
+            lo, hi, size = 96, max_size, 96
+            while lo <= hi:
+                mid = (lo + hi) // 2
+                if all(width(pt, mid) <= max_w for pt in parts):
+                    size, lo = mid, mid + 1
+                else:
+                    hi = mid - 1
+            if all(width(pt, size) <= max_w for pt in parts):
+                cands.append((n, size, parts))
+        if cands:
+            cands.sort(key=lambda c: (c[0], -c[1]))
+            n0, s0, p0 = cands[0]
+            for n, s, pt in cands[1:]:
+                if s >= s0 + 8:
+                    return pt, s
+            return p0, s0
+        per = (len(txt) + 1) // 2
+        return [txt[:per], txt[per:]], 96
+
+    def _draw_translate(self, img, rec, alpha, cy, bass):
+        if not rec["translate"] or alpha <= 0.004:
+            return
+        L, B = rec["whole2"], rec["base2"]
+        gap = 22
+        nl = rec.get("nlines", 1)
+        th = rec.get("text_h") or rec["whole"].height
+        if nl > 1:
+            bottom = (cy + (nl - 1) * rec["line_h"] / 2 + th / 2)
+        else:
+            bottom = cy + th / 2
+        yc = bottom + gap + L.height / 2
+        sc = 1.0 + 0.012 * bass
+        paste(img, B, W / 2, yc, alpha * 0.62, sc)
+        paste(img, L, W / 2, yc, alpha * 0.72, sc)
 
     # -------------------------------------------------------------- sections
     def section_at(self, t):
@@ -449,38 +636,73 @@ class Renderer:
 
     # ------------------------------------------------------------- typography
     def draw_lyric(self, img, t, i, acc):
+        # Minimum on-screen dwell so short sung phrases don't flash by: a line is
+        # held (fully revealed) past its sung end up to MIN_DWELL, provided the
+        # next cue leaves room. Fade-out happens at the extended display end, not
+        # at the sung end. The karaoke reveal (u) still tracks the sung phrase.
+        MIN_DWELL = 2.2
+        HANDOVER_GAP = 0.22
+
         cue = None
-        for c in self.cues:
-            if c["start"] <= t < c["end"]:
+        nxt_start = self.dur
+        # pick the last cue that has started; keep it through its extended
+        # display window (dwell tail), not just its sung span
+        for idx, c in enumerate(self.cues):
+            if c["start"] <= t:
                 cue = c
+                nxt_start = self.cues[idx + 1]["start"] if idx + 1 < len(self.cues) else self.dur
+            else:
                 break
         if cue is None:
             return
-        rec = self.line_layers(cue)
-        span = cue["end"] - cue["start"]
-        u = (t - cue["start"]) / max(0.001, span)   # 0..1
-        acc_i = tuple(int(v) for v in acc)
 
-        # envelope: in / hold / out
+        sung = cue["end"] - cue["start"]
+        disp_end = cue["end"]
+        if sung < MIN_DWELL:
+            room = (nxt_start - HANDOVER_GAP) - cue["end"]
+            if room > 0:
+                disp_end = min(cue["end"] + (MIN_DWELL - sung),
+                               nxt_start - HANDOVER_GAP)
+        if t >= disp_end:
+            return
+
+        rec = self.line_layers(cue)
+        # u = clamped sung progress (drives karaoke reveal / chorus char highlight)
+        u = min(1.0, max(0.0, (t - cue["start"]) / max(0.001, sung)))
+        # du = display-window progress (drives fade in / out around the held tail)
+        du = (t - cue["start"]) / max(0.001, disp_end - cue["start"])
         ain, aout = 0.16, 0.14
-        if u < ain:
-            k = u / ain
-            alpha = 1.0 - (1.0 - k) ** 2
-        elif u > 1 - aout:
-            k = (1.0 - u) / aout
-            alpha = k ** 1.4
+        if du < ain:
+            alpha = 1.0 - (1.0 - du / ain) ** 2
+        elif du > 1 - aout:
+            alpha = max(0.0, (1.0 - du) / aout) ** 1.4
         else:
             alpha = 1.0
 
         cy = H / 2 - 20
+        nl = rec.get("nlines", 1)
+        if nl > 1:
+            # kit#25.1: a stacked block is (nl-1)*line_h taller than a single
+            # line; lift it so its bottom (and the translate caption below)
+            # stays clear of the lower spectrum ring and the canvas edge.
+            cy -= max(0.0, (nl - 1) * rec["line_h"] / 2 - 70)
         bass = float(self.bass[i])
+        acc_i = tuple(int(v) for v in acc)
 
         if rec["chorus"]:
             self._draw_chorus(img, rec, u, alpha, cy, i, bass)
         else:
             self._draw_plain(img, rec, cue, u, alpha, cy, bass, acc_i)
 
+        # Bilingual subtitle (if this cue carries a "translate" line): rendered
+        # below the primary with the SAME envelope so it appears in unison
+        # ("一起出现") instead of as a separate, later cue.
+        self._draw_translate(img, rec, alpha, cy, bass)
+
     def _draw_plain(self, img, rec, cue, u, alpha, cy, bass, acc):
+        if rec.get("nlines", 1) > 1:
+            self._draw_plain_multi(img, rec, u, alpha, cy, bass)
+            return
         L = rec["whole"]
         paste(img, rec["base"], W / 2, cy, alpha * 0.92, 1.0)
         ain = 0.16
@@ -511,7 +733,46 @@ class Renderer:
             clip = L.crop((0, 0, max(1, int(L.width * reveal)), L.height))
             paste(img, clip, W / 2 - (L.width - clip.width) / 2, cy, alpha, scale)
 
+    def _draw_plain_multi(self, img, rec, u, alpha, cy, bass):
+        """kit#25: stacked sub-lines, each with its own karaoke window."""
+        nl = rec["nlines"]
+        lh = rec["line_h"]
+        y0 = cy - (nl - 1) * lh / 2
+        for j, part in enumerate(rec["parts"]):
+            uj = max(0.0, min(1.0, u * nl - j))
+            yj = y0 + j * lh
+            L = part["whole"]
+            paste(img, part["base"], W / 2, yj, alpha * 0.92, 1.0)
+            ain = 0.16
+            if uj < ain:
+                k = uj / ain
+                e = 1.0 - (1.0 - k) ** 3
+                scale = 0.84 + 0.16 * e
+                dy = (1.0 - e) * 46
+            else:
+                scale = 1.0 + 0.020 * bass
+                dy = 0.0
+            if uj > 0.86:
+                scale *= 1.0 + (uj - 0.86) / 0.14 * 0.07
+                dy -= (uj - 0.86) / 0.14 * 22
+            reveal = max(0.0, min(1.0, uj / 0.90))
+            clip = L.crop((0, 0, max(1, int(L.width * reveal)), L.height))
+            paste(img, clip, W / 2 - (L.width - clip.width) / 2, yj + dy,
+                  alpha, scale)
+
     def _draw_chorus(self, img, rec, u, alpha, cy, i, bass):
+        if rec.get("nlines", 1) > 1:
+            nl = rec["nlines"]
+            lh = rec["line_h"]
+            y0 = cy - (nl - 1) * lh / 2
+            for j, part in enumerate(rec["parts"]):
+                uj = max(0.0, min(1.0, u * nl - j))
+                self._draw_chorus_line(img, part, uj, alpha,
+                                       y0 + j * lh, i, bass)
+            return
+        self._draw_chorus_line(img, rec, u, alpha, cy, i, bass)
+
+    def _draw_chorus_line(self, img, rec, u, alpha, cy, i, bass):
         chars = rec["chars"]
         extents = rec["extents"]
         n = len(chars)
@@ -548,8 +809,6 @@ class Renderer:
     # ------------------------------------------------------------------ HUD
     def draw_hud(self, img, t):
         d = ImageDraw.Draw(img, "RGBA")
-        # top-left watermark
-        img.paste(self.wm_layer, (78, 62), self.wm_layer)
         # top-right album
         cl = self.corner_layer
         img.paste(cl, (W - 78 - cl.width, 58), cl)
